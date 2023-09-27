@@ -12,6 +12,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
+        if (getAllUsers().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+            throw new RuntimeException("Пользователь с таким Email уже существует!");
+        }
         User user = userStorage.createUser(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
@@ -19,8 +22,17 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
         User newUser = userStorage.getUserById(userId);
+
+        if (!newUser.getEmail().equals(userDto.getEmail())) {
+            if (getAllUsers().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+                throw new RuntimeException("Пользователь с таким Email уже существует!");
+            }
+        }
+
         if (userDto.getName() != null) newUser.setName(userDto.getName());
         if (userDto.getEmail() != null) newUser.setEmail(userDto.getEmail());
+
+
         return UserMapper.toUserDto(userStorage.updateUser(userId, newUser));
     }
 

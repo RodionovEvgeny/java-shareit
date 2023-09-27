@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +28,14 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Item getItem(long itemId) {
-        return items.get(itemId);
+    public Item getItemById(long itemId) {
+        if (items.containsKey(itemId)) {
+            return items.get(itemId);
+        } else {
+            throw new EntityNotFoundException(
+                    String.format("Предмет с id = %s не найден!", itemId),
+                    Item.class.getName());
+        }
     }
 
     @Override

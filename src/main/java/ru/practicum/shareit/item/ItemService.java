@@ -10,7 +10,7 @@ public interface ItemService {
 
     ItemDto updateItem(long userId, long itemId, ItemDto itemDto);
 
-    ItemDto getItem(long itemId);
+    ItemDto getItemById(long itemId);
 
     List<ItemDto> getOwnersItems(long userId);
 

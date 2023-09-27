@@ -8,7 +8,7 @@ public interface ItemStorage {
 
     Item updateItem(long itemId, Item item);
 
-    Item getItem(long itemId);
+    Item getItemById(long itemId);
 
     List<Item> getOwnersItems(long userId);
 

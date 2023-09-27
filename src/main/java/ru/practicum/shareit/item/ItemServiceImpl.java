@@ -2,7 +2,9 @@ package ru.practicum.shareit.item;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.NoAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.UserStorage;
 
 import java.util.List;
 
@@ -10,9 +12,11 @@ import java.util.List;
 @AllArgsConstructor
 public class ItemServiceImpl implements ItemService {
     private final ItemStorage itemStorage;
+    private final UserStorage userStorage;
 
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
+        userStorage.getUserById(userId);
         itemDto.setOwner(userId);
         Item item = itemStorage.addItem(ItemMapper.toItem(itemDto));
         return ItemMapper.toItemDto(item);
@@ -20,22 +24,24 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
-        Item newItem = itemStorage.getItem(itemId);
+        userStorage.getUserById(userId);
+        Item newItem = itemStorage.getItemById(itemId);
+        if (newItem.getOwner() != userId) throw new NoAccessException("Редактировать предмет может только его хозяин!");
         if (itemDto.getName() != null) newItem.setName(itemDto.getName());
         if (itemDto.getDescription() != null) newItem.setDescription(itemDto.getDescription());
         if (itemDto.getAvailable() != null) newItem.setAvailable(itemDto.getAvailable());
-
         return ItemMapper.toItemDto(itemStorage.updateItem(itemId, newItem));
     }
 
     @Override
-    public ItemDto getItem(long itemId) {
-        Item item = itemStorage.getItem(itemId);
+    public ItemDto getItemById(long itemId) {
+        Item item = itemStorage.getItemById(itemId);
         return ItemMapper.toItemDto(item);
     }
 
     @Override
     public List<ItemDto> getOwnersItems(long userId) {
+        userStorage.getUserById(userId);
         return ItemMapper.toItemDto(itemStorage.getOwnersItems(userId));
     }
 

@@ -40,7 +40,7 @@ public class ItemController {
 
     @GetMapping("/{itemId}")
     public ItemDto getItem(@PathVariable(name = "itemId") long itemId) {
-        return itemService.getItem(itemId);
+        return itemService.getItemById(itemId);
     }
 
     @GetMapping

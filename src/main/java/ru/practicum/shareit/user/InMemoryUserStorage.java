@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +22,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User getUserById(Long userId) {
-        return users.get(userId);
+        if (users.containsKey(userId)) {
+            return users.get(userId);
+        } else {
+            throw new EntityNotFoundException(
+                    String.format("Пользователь с id = %s не найден!", userId),
+                    User.class.getName());
+        }
     }
 
     @Override
