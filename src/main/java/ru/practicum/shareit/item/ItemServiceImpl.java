@@ -6,6 +6,7 @@ import ru.practicum.shareit.exceptions.NoAccessException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.UserStorage;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -47,6 +48,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> findItems(String text) {
-        return ItemMapper.toItemDto(itemStorage.findItems(text));
+        if (text == null || text.isBlank()) return new ArrayList<>();
+        return ItemMapper.toItemDto(itemStorage.findItems(text.toLowerCase()));
     }
 }

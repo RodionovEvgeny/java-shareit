@@ -19,7 +19,7 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionDTO handleNoAccessException(final NoAccessException e) {
         log.warn(e.getMessage());
         return new ExceptionDTO(e.getMessage());
