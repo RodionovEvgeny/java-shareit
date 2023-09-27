@@ -45,4 +45,10 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         return UserMapper.toUserDto(userStorage.getAllUsers());
     }
+
+    @Override
+    public void deleteUserById(Long userId) {
+        userStorage.getUserById(userId);
+        userStorage.deleteUserById(userId);
+    }
 }

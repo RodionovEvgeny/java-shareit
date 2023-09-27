@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,5 +42,8 @@ public class UserController {
         return userService.getAllUsers();
     }
 
-
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable(name = "userId") Long userId) {
+        userService.deleteUserById(userId);
+    }
 }

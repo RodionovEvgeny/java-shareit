@@ -1,7 +1,10 @@
 package ru.practicum.shareit.user;
 
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.item.ItemStorage;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+//@RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
+    //private final ItemStorage itemStorage;
     private final Map<Long, User> users = new HashMap<>();
     private long vacantId = 1;
 
@@ -40,5 +45,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public void deleteUserById(Long userId) {
+        users.remove(userId);
     }
 }
