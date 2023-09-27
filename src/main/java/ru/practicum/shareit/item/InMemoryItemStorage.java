@@ -1,13 +1,13 @@
 package ru.practicum.shareit.item;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Component
 public class InMemoryItemStorage implements ItemStorage {
     private final Map<Long, Item> items = new HashMap<>();
     private int vacantId = 1;

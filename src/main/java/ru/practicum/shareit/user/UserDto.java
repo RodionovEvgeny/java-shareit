@@ -6,12 +6,9 @@ import lombok.Data;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Data
 @Builder
-public class User {
+public class UserDto {
     private long id;
     @NotEmpty(message = "Введено пустое имя.")
     private String name;

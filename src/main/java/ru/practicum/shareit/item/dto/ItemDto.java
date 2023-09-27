@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Data;
 import ru.practicum.shareit.request.ItemRequest;
 
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -21,8 +20,6 @@ public class ItemDto {
     @NotNull
     @NotBlank
     private String description;
-    @NotNull
-    @Min(1)
     private Long owner;
     private Boolean available;
     private ItemRequest request;
