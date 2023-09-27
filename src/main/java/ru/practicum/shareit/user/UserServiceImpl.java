@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.EmailAlreadyExistsException;
 
 import java.util.List;
 
@@ -12,9 +13,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        if (getAllUsers().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
-            throw new RuntimeException("Пользователь с таким Email уже существует!");
-        }
+        validateEmail(userDto);
         User user = userStorage.createUser(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
@@ -24,14 +23,10 @@ public class UserServiceImpl implements UserService {
         User newUser = userStorage.getUserById(userId);
 
         if (!newUser.getEmail().equals(userDto.getEmail())) {
-            if (getAllUsers().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
-                throw new RuntimeException("Пользователь с таким Email уже существует!");
-            }
+            validateEmail(userDto);
         }
-
         if (userDto.getName() != null) newUser.setName(userDto.getName());
         if (userDto.getEmail() != null) newUser.setEmail(userDto.getEmail());
-
 
         return UserMapper.toUserDto(userStorage.updateUser(userId, newUser));
     }
@@ -50,5 +45,13 @@ public class UserServiceImpl implements UserService {
     public void deleteUserById(Long userId) {
         userStorage.getUserById(userId);
         userStorage.deleteUserById(userId);
+    }
+
+    private void validateEmail(UserDto userDto) {
+        if (getAllUsers().stream().anyMatch(u -> u.getEmail().equals(userDto.getEmail()))) {
+            throw new EmailAlreadyExistsException(
+                    String.format("Пользователь с Email = %s уже существует!",
+                            userDto.getEmail()));
+        }
     }
 }

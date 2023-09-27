@@ -24,4 +24,13 @@ public class ErrorHandler {
         log.warn(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ExceptionDTO handleEmailAlreadyExistsException(final EmailAlreadyExistsException e) {
+        log.warn(e.getMessage());
+        return new ExceptionDTO(e.getMessage());
+    }
+
+
 }
