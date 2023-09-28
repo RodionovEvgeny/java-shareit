@@ -11,10 +11,8 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class ItemDto {
     private long id;
-    @NotNull
     @NotBlank
     private String name;
-    @NotNull
     @NotBlank
     private String description;
     private Long owner;
