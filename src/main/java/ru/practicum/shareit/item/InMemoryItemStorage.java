@@ -52,4 +52,15 @@ public class InMemoryItemStorage implements ItemStorage {
                                 item.getDescription().toLowerCase().contains(text))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteItemsByOwnersId(long userId) {
+        List<Long> itemsToDelete = items.values().stream()
+                .filter(item -> item.getOwner() == userId)
+                .map(Item::getId)
+                .collect(Collectors.toList());
+        for (Long id : itemsToDelete) {
+            items.remove(id);
+        }
+    }
 }
