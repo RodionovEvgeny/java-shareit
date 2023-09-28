@@ -11,14 +11,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.shareit.item.dto.ItemDto;
 
 import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @Slf4j
 @RestController
 @RequestMapping("/items")
@@ -55,5 +51,4 @@ public class ItemController {
                                    @RequestParam(value = "text") String text) {
         return itemService.findItems(text);
     }
-
 }
