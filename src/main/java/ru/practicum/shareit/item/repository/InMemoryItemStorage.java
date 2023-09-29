@@ -1,7 +1,8 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.repository;
 
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.item.Item;
 
 import java.util.HashMap;
 import java.util.List;
