@@ -22,7 +22,6 @@ import java.util.List;
 @RequestMapping("/items")
 @AllArgsConstructor
 public class ItemController {
-
     private final ItemService itemService;
 
     @PostMapping

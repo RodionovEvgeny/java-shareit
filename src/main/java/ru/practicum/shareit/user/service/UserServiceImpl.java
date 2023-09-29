@@ -25,13 +25,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
         User newUser = userStorage.getUserById(userId);
-
-        if (!newUser.getEmail().equals(userDto.getEmail())) {
-            validateEmail(userDto);
-        }
+        if (!newUser.getEmail().equals(userDto.getEmail())) validateEmail(userDto);
         if (userDto.getName() != null) newUser.setName(userDto.getName());
         if (userDto.getEmail() != null) newUser.setEmail(userDto.getEmail());
-
         return UserMapper.toUserDto(userStorage.updateUser(userId, newUser));
     }
 

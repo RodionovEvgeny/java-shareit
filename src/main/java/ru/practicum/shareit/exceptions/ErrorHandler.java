@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionDTO handleNotFoundException(final EntityNotFoundException e) {
@@ -31,6 +30,4 @@ public class ErrorHandler {
         log.warn(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
-
-
 }
