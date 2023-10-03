@@ -28,12 +28,13 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         userStorage.getUserById(userId);
-        Item newItem = itemStorage.getItemById(itemId);
-        if (newItem.getOwner() != userId) throw new NoAccessException("Редактировать предмет может только его хозяин!");
-        if (itemDto.getName() != null) newItem.setName(itemDto.getName());
-        if (itemDto.getDescription() != null) newItem.setDescription(itemDto.getDescription());
-        if (itemDto.getAvailable() != null) newItem.setAvailable(itemDto.getAvailable());
-        return ItemMapper.toItemDto(itemStorage.updateItem(itemId, newItem));
+        Item updatedItem = itemStorage.getItemById(itemId);
+        if (updatedItem.getOwner() != userId)
+            throw new NoAccessException("Редактировать предмет может только его хозяин!");
+        if (itemDto.getName() != null) updatedItem.setName(itemDto.getName());
+        if (itemDto.getDescription() != null) updatedItem.setDescription(itemDto.getDescription());
+        if (itemDto.getAvailable() != null) updatedItem.setAvailable(itemDto.getAvailable());
+        return ItemMapper.toItemDto(itemStorage.updateItem(updatedItem));
     }
 
     @Override
@@ -44,12 +45,12 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> getOwnersItems(long userId) {
         userStorage.getUserById(userId);
-        return ItemMapper.toItemDto(itemStorage.getOwnersItems(userId));
+        return ItemMapper.toItemDtoList(itemStorage.getOwnersItems(userId));
     }
 
     @Override
     public List<ItemDto> findItems(String text) {
         if (text == null || text.isBlank()) return new ArrayList<>();
-        return ItemMapper.toItemDto(itemStorage.findItems(text.toLowerCase()));
+        return ItemMapper.toItemDtoList(itemStorage.findItems(text.toLowerCase()));
     }
 }

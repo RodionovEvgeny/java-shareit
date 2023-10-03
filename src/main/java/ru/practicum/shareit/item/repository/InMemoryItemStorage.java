@@ -22,9 +22,8 @@ public class InMemoryItemStorage implements ItemStorage {
     }
 
     @Override
-    public Item updateItem(long itemId, Item item) {
-        item.setId(itemId);
-        items.put(itemId, item);
+    public Item updateItem(Item item) {
+        items.put(item.getId(), item);
         return item;
     }
 

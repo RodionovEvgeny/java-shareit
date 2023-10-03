@@ -9,7 +9,7 @@ public interface UserStorage {
 
     User getUserById(Long userId);
 
-    User updateUser(Long userId, User newUser);
+    User updateUser(User updatedUser);
 
     List<User> getAllUsers();
 

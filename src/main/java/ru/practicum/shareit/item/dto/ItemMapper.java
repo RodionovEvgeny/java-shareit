@@ -27,7 +27,7 @@ public class ItemMapper {
                 .build();
     }
 
-    public static List<ItemDto> toItemDto(List<Item> items) {
+    public static List<ItemDto> toItemDtoList(List<Item> items) {
         return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
     }
 }

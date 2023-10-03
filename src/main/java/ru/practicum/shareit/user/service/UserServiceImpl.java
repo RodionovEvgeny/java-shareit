@@ -24,11 +24,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User newUser = userStorage.getUserById(userId);
-        if (!newUser.getEmail().equals(userDto.getEmail())) validateEmail(userDto);
-        if (userDto.getName() != null) newUser.setName(userDto.getName());
-        if (userDto.getEmail() != null) newUser.setEmail(userDto.getEmail());
-        return UserMapper.toUserDto(userStorage.updateUser(userId, newUser));
+        User updatedUser = userStorage.getUserById(userId);
+        if (!updatedUser.getEmail().equals(userDto.getEmail())) validateEmail(userDto);
+        if (userDto.getName() != null) updatedUser.setName(userDto.getName());
+        if (userDto.getEmail() != null) updatedUser.setEmail(userDto.getEmail());
+        return UserMapper.toUserDto(userStorage.updateUser(updatedUser));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getAllUsers() {
-        return UserMapper.toUserDto(userStorage.getAllUsers());
+        return UserMapper.toUserDtoList(userStorage.getAllUsers());
     }
 
     @Override
