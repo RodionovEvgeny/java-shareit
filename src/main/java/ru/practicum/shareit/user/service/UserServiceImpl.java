@@ -3,48 +3,55 @@ package ru.practicum.shareit.user.service;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exceptions.EmailAlreadyExistsException;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.dto.UserMapper;
-import ru.practicum.shareit.user.repository.UserStorage;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
 @Service
 @AllArgsConstructor
+//@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
+    //@Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
         validateEmail(userDto);
-        User user = userStorage.createUser(UserMapper.toUser(userDto));
+        User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User updatedUser = userStorage.getUserById(userId);
+        User updatedUser = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Пользователь с id = %s не найден!", userId),
+                User.class.getName()));
         if (!updatedUser.getEmail().equals(userDto.getEmail())) validateEmail(userDto);
         if (userDto.getName() != null) updatedUser.setName(userDto.getName());
         if (userDto.getEmail() != null) updatedUser.setEmail(userDto.getEmail());
-        return UserMapper.toUserDto(userStorage.updateUser(updatedUser));
+        return UserMapper.toUserDto(userRepository.save(updatedUser));
     }
 
     @Override
     public UserDto getUserById(Long userId) {
-        return UserMapper.toUserDto(userStorage.getUserById(userId));
+        return UserMapper.toUserDto(userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Пользователь с id = %s не найден!", userId),
+                User.class.getName())));
     }
 
     @Override
     public List<UserDto> getAllUsers() {
-        return UserMapper.toUserDtoList(userStorage.getAllUsers());
+        return UserMapper.toUserDtoList(userRepository.findAll());
     }
 
     @Override
     public void deleteUserById(Long userId) {
-        userStorage.getUserById(userId);
-        userStorage.deleteUserById(userId);
+        userRepository.findById(userId);
+        userRepository.deleteById(userId);
     }
 
     private void validateEmail(UserDto userDto) {
