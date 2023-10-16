@@ -3,32 +3,16 @@ package ru.practicum.shareit.booking;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.exceptions.EntityNotFoundException;
-import ru.practicum.shareit.exceptions.NoAccessException;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemMapper;
-import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class BookingServiceImpl implements BookingService {
-    private final ItemRepository itemRepository;
-    private final UserRepository userRepository;
 
 
     @Override
-    public BookingDto addBooking(BookingDto bookingDto) {
-        return null;
-    }
-
-    @Override
-    public BookingDto updateBooking(long userId, long itemId, BookingDto bookingDto) {
+    public BookingDto addBooking(long userId, BookingDto bookingDto) {
         return null;
     }
 
@@ -38,8 +22,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public void approveBooking(long userId, boolean approved) {
-
+    public BookingDto approveBooking(long userId, long bookingId, boolean approved) {
+        return null;
     }
 
     @Override
