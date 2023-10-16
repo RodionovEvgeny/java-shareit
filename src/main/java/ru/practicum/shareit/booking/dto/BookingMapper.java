@@ -14,13 +14,13 @@ public class BookingMapper {
                 .build();
     }
 
-    public static BookingDto toBookingDto(Booking booking) {
+    public static BookingDto toBookingDto(Booking booking, long userId) {
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())
                 .end(booking.getEnd())
                 .item(booking.getItem())
-                .booker(booking.getBooker())
+                .booker(userId)
                 .status(booking.getStatus())
                 .build();
     }
