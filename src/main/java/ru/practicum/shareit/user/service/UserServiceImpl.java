@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
     //@Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        validateEmail(userDto);
+        //validateEmail(userDto);
         User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
