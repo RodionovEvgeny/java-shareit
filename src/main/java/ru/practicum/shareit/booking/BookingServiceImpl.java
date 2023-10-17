@@ -8,11 +8,13 @@ import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
+import ru.practicum.shareit.exceptions.NoAccessException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 @Service
@@ -33,22 +35,59 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto getBookingById(long userId, long bookingId) {
-        return null;
+        validateUserById(userId);
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Бронирование с id = %s не найдено!", bookingId),
+                Booking.class.getName()));
+        if (userId != booking.getBooker() || userId != itemRepository.findById(booking.getItem()).get().getOwner()) {
+            throw new NoAccessException("Просмотр бронирования разрешен только автору или владельцу предмета!");
+        } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public BookingDto approveBooking(long userId, long bookingId, boolean approved) {
-        return null;
+        validateUserById(userId);
+        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Бронирование с id = %s не найдено!", bookingId),
+                Booking.class.getName()));
+        if (userId != itemRepository.findById(booking.getItem()).get().getOwner()) {
+            throw new NoAccessException("Подтверждение бронирования разрешено только владельцу предмета!");
+        } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
+        if (approved) booking.setStatus(BookingStatus.APPROVED.name());
+        else booking.setStatus(BookingStatus.REJECTED.name());
+        return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public List<BookingDto> getOwnersBookings(long userId, State state) {
+        //TODO надо таки добавлять связи! А то без них будет выглядеть уродски ;
         return null;
     }
 
     @Override
     public List<BookingDto> getBookersBookings(long userId, State state) {
-        return null;
+        validateUserById(userId);
+        switch (state) {
+            case ALL:
+                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerOrderByStartDesc(userId));
+            case PAST:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerAndEndBeforeOrderByStartDesc(userId, Instant.now()));
+            case FUTURE:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerAndStartAfterOrderByStartDesc(userId, Instant.now()));
+            case CURRENT:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerAndStartBeforeAndEndAfterOrderByStartDesc(userId, Instant.now(), Instant.now()));
+            case WAITING:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+            case REJECTED:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+        }
+        throw new RuntimeException("Что то пошло не так!");
     }
 
     private void validateUserById(long userId) {

@@ -2,6 +2,11 @@ package ru.practicum.shareit.booking.dto;
 
 import ru.practicum.shareit.booking.Booking;
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class BookingMapper {
     public static Booking toBooking(BookingDto bookingDto, long userId) {
         return Booking.builder()
@@ -23,9 +28,10 @@ public class BookingMapper {
                 .booker(booking.getBooker())
                 .status(BookingStatus.valueOf(booking.getStatus()))
                 .build();
+
     }
 
-   /* public static List<ItemDto> toItemDtoList(List<Item> items) {
-        return items.stream().map(ItemMapper::toItemDto).collect(Collectors.toList());
-    }*/
+   public static List<BookingDto> toBookingDtoList(List<Booking> bookings) {
+        return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
+    }
 }
