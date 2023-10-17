@@ -3,11 +3,11 @@ package ru.practicum.shareit.booking;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Tolerate;
-import ru.practicum.shareit.booking.dto.BookingStatus;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.user.User;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.sql.Timestamp;
@@ -21,12 +21,15 @@ import java.sql.Timestamp;
 @Builder
 public class Booking {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(name = "start_time")
     private Timestamp start;
+    @Column(name = "end_time")
     private Timestamp end;
     private Long item;
     private Long booker;
-    private BookingStatus status;
+    private String status;
 
     @Tolerate
     public Booking() {

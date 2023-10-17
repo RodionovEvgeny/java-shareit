@@ -19,7 +19,7 @@ public class BookingDto {
     @Future
     private Timestamp end;
     @NotNull
-    private Long item;
+    private Long itemId;
     private Long booker;
     private BookingStatus status;
 }
