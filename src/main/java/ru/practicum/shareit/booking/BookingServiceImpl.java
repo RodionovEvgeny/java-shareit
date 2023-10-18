@@ -17,6 +17,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,10 +30,10 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto addBooking(long userId, BookingDto bookingDto) {
         User user = validateUserById(userId);
-        validateItemById(bookingDto.getItemId());
+        Item item = validateItemById(bookingDto.getItemId());
         validateBookingsDates(bookingDto);
         bookingDto.setStatus(BookingStatus.WAITING);
-        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, user));
+        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, user, item));
         return BookingMapper.toBookingDto(booking);
     }
 
@@ -42,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Бронирование с id = %s не найдено!", bookingId),
                 Booking.class.getName()));
-        if (userId != booking.getBooker().getId() || userId != itemRepository.findById(booking.getItem()).get().getOwner()) {
+        if (userId != booking.getBooker().getId() && userId != booking.getItem().getOwner()) {
             throw new NoAccessException("Просмотр бронирования разрешен только автору или владельцу предмета!");
         } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
         return BookingMapper.toBookingDto(booking);
@@ -54,7 +55,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Бронирование с id = %s не найдено!", bookingId),
                 Booking.class.getName()));
-        if (userId != itemRepository.findById(booking.getItem()).get().getOwner()) {
+        if (userId != booking.getItem().getOwner()) {
             throw new NoAccessException("Подтверждение бронирования разрешено только владельцу предмета!");
         } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
         if (approved) booking.setStatus(BookingStatus.APPROVED.name());
@@ -73,22 +74,22 @@ public class BookingServiceImpl implements BookingService {
         validateUserById(userId);
         switch (state) {
             case ALL:
-                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerOrderByStartDesc(userId));
+                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId));
             case PAST:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerAndEndBeforeOrderByStartDesc(userId, Instant.now()));
+                        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case FUTURE:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerAndStartAfterOrderByStartDesc(userId, Instant.now()));
+                        bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case CURRENT:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerAndStartBeforeAndEndAfterOrderByStartDesc(userId, Instant.now(), Instant.now()));
+                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case WAITING:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
             case REJECTED:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
         }
         throw new RuntimeException("Что то пошло не так!");
     }
@@ -99,12 +100,13 @@ public class BookingServiceImpl implements BookingService {
                 User.class.getName()));
     }
 
-    private void validateItemById(long itemId) {
+    private Item validateItemById(long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Предмет с id = %s не найден!", itemId),
                 Item.class.getName()));
         if (!item.getAvailable()) throw new ItemNotAvailableException(
                 String.format("Предмет с id = %s недоступен для бронирования!", itemId));
+        return item;
     }
 
     private void validateBookingsDates(BookingDto bookingDto) {

@@ -6,18 +6,19 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByBookerOrderByStartDesc(long userId);
+    List<Booking> findByBookerIdOrderByStartDesc(long userId);
 
-    List<Booking> findByBookerAndEndBeforeOrderByStartDesc(long userId, Instant now);
+    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(long userId, LocalDateTime now);
 
-    List<Booking> findByBookerAndStartAfterOrderByStartDesc(long userId, Instant now);
+    List<Booking> findByBookerIdAndStartAfterOrderByStartDesc(long userId, LocalDateTime now);
 
-    List<Booking> findByBookerAndStartBeforeAndEndAfterOrderByStartDesc(long userId, Instant now, Instant now2);
+    List<Booking> findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(long userId, LocalDateTime now, LocalDateTime now2);
 
-    List<Booking> findByBookerAndStatusOrderByStartDesc(long userId, String status);
+    List<Booking> findByBookerIdAndStatusOrderByStartDesc(long userId, String status);
 
 
 

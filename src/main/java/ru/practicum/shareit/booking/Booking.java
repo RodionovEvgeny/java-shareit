@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Tolerate;
+import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.Column;
@@ -30,7 +31,9 @@ public class Booking {
     private LocalDateTime start;
     @Column(name = "end_time")
     private LocalDateTime end;
-    private Long item;
+    @ManyToOne
+    @JoinColumn(name = "item")
+    private Item item;
 
 
     @ManyToOne
