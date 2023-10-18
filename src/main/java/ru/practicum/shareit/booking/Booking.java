@@ -3,14 +3,17 @@ package ru.practicum.shareit.booking;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Tolerate;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * TODO Sprint add-bookings.
@@ -24,11 +27,15 @@ public class Booking {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     @Column(name = "start_time")
-    private Timestamp start;
+    private LocalDateTime start;
     @Column(name = "end_time")
-    private Timestamp end;
+    private LocalDateTime end;
     private Long item;
-    private Long booker;
+
+
+    @ManyToOne
+    @JoinColumn(name = "booker")
+    private User booker;
     private String status;
 
     @Tolerate

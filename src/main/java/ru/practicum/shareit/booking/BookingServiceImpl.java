@@ -28,11 +28,11 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingDto addBooking(long userId, BookingDto bookingDto) {
-        validateUserById(userId);
+        User user = validateUserById(userId);
         validateItemById(bookingDto.getItemId());
         validateBookingsDates(bookingDto);
         bookingDto.setStatus(BookingStatus.WAITING);
-        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, userId));
+        Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, user));
         return BookingMapper.toBookingDto(booking);
     }
 
@@ -42,7 +42,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Бронирование с id = %s не найдено!", bookingId),
                 Booking.class.getName()));
-        if (userId != booking.getBooker() || userId != itemRepository.findById(booking.getItem()).get().getOwner()) {
+        if (userId != booking.getBooker().getId() || userId != itemRepository.findById(booking.getItem()).get().getOwner()) {
             throw new NoAccessException("Просмотр бронирования разрешен только автору или владельцу предмета!");
         } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
         return BookingMapper.toBookingDto(booking);
@@ -93,8 +93,8 @@ public class BookingServiceImpl implements BookingService {
         throw new RuntimeException("Что то пошло не так!");
     }
 
-    private void validateUserById(long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+    private User validateUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Пользователь с id = %s не найден!", userId),
                 User.class.getName()));
     }
@@ -112,10 +112,10 @@ public class BookingServiceImpl implements BookingService {
             throw new InappropriateTimeException("Необходимо указать время начала и окончания бронирования!");
         } else if (bookingDto.getStart().equals(bookingDto.getEnd())) {
             throw new InappropriateTimeException("Время начала и окончания бронирования должно отличаться!");
-        } else if (bookingDto.getStart().after(bookingDto.getEnd())) {
+        } else if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
             throw new InappropriateTimeException("Время начала бронирования не может быть после окончания бронирования!");
-        } else if (bookingDto.getStart().before(Timestamp.from(Instant.now())) ||
-                bookingDto.getEnd().before(Timestamp.from(Instant.now()))) {
+        } else if (bookingDto.getStart().isBefore(Timestamp.from(Instant.now()).toLocalDateTime()) ||
+                bookingDto.getEnd().isBefore(Timestamp.from(Instant.now()).toLocalDateTime())) {
             throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
         }
     }

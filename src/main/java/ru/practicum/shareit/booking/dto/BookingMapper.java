@@ -1,20 +1,21 @@
 package ru.practicum.shareit.booking.dto;
 
+import lombok.AllArgsConstructor;
 import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.user.User;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@AllArgsConstructor
 public class BookingMapper {
-    public static Booking toBooking(BookingDto bookingDto, long userId) {
+    public static Booking toBooking(BookingDto bookingDto, User user) {
         return Booking.builder()
                 .id(bookingDto.getId())
                 .start(bookingDto.getStart())
                 .end(bookingDto.getEnd())
                 .item(bookingDto.getItemId())
-                .booker(userId)
+                .booker(user)
                 .status(bookingDto.getStatus().name())
                 .build();
     }
@@ -31,7 +32,7 @@ public class BookingMapper {
 
     }
 
-   public static List<BookingDto> toBookingDtoList(List<Booking> bookings) {
+    public static List<BookingDto> toBookingDtoList(List<Booking> bookings) {
         return bookings.stream().map(BookingMapper::toBookingDto).collect(Collectors.toList());
     }
 }

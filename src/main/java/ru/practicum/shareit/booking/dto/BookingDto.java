@@ -2,10 +2,11 @@ package ru.practicum.shareit.booking.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import ru.practicum.shareit.user.User;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 /**
  * TODO Sprint add-bookings.
@@ -15,11 +16,11 @@ import java.sql.Timestamp;
 public class BookingDto {
     private long id;
     @Future
-    private Timestamp start;
+    private LocalDateTime start;
     @Future
-    private Timestamp end;
+    private LocalDateTime end;
     @NotNull
     private Long itemId;
-    private Long booker;
+    private User booker;
     private BookingStatus status;
 }
