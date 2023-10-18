@@ -38,5 +38,10 @@ public class ErrorHandler {
         return new ExceptionDTO(e.getMessage());
     }
 
-
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDTO handleInappropriateTimeException(final InappropriateTimeException e) {
+        log.warn(e.getMessage());
+        return new ExceptionDTO(e.getMessage());
+    }
 }

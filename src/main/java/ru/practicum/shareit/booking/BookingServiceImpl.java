@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.exceptions.InappropriateTimeException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.exceptions.NoAccessException;
 import ru.practicum.shareit.item.Item;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto addBooking(long userId, BookingDto bookingDto) {
         validateUserById(userId);
         validateItemById(bookingDto.getItemId());
+        validateBookingsDates(bookingDto);
         bookingDto.setStatus(BookingStatus.WAITING);
         Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, userId));
         return BookingMapper.toBookingDto(booking);
@@ -102,5 +105,18 @@ public class BookingServiceImpl implements BookingService {
                 Item.class.getName()));
         if (!item.getAvailable()) throw new ItemNotAvailableException(
                 String.format("Предмет с id = %s недоступен для бронирования!", itemId));
+    }
+
+    private void validateBookingsDates(BookingDto bookingDto) {
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
+            throw new InappropriateTimeException("Необходимо указать время начала и окончания бронирования!");
+        } else if (bookingDto.getStart().equals(bookingDto.getEnd())) {
+            throw new InappropriateTimeException("Время начала и окончания бронирования должно отличаться!");
+        } else if (bookingDto.getStart().after(bookingDto.getEnd())) {
+            throw new InappropriateTimeException("Время начала бронирования не может быть после окончания бронирования!");
+        } else if (bookingDto.getStart().before(Timestamp.from(Instant.now())) ||
+                bookingDto.getEnd().before(Timestamp.from(Instant.now()))) {
+            throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
+        }
     }
 }
