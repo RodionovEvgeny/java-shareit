@@ -10,6 +10,7 @@ import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.InappropriateTimeException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.exceptions.NoAccessException;
+import ru.practicum.shareit.exceptions.UnsupportedStatusException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -60,38 +61,42 @@ public class BookingServiceImpl implements BookingService {
         } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
         if (approved) booking.setStatus(BookingStatus.APPROVED.name());
         else booking.setStatus(BookingStatus.REJECTED.name());
-        return BookingMapper.toBookingDto(booking);
+        return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
     @Override
-    public List<BookingDto> getOwnersBookings(long userId, State state) {
+    public List<BookingDto> getOwnersBookings(long userId, String state) {
         //TODO надо таки добавлять связи! А то без них будет выглядеть уродски ;
         return null;
     }
 
     @Override
-    public List<BookingDto> getBookersBookings(long userId, State state) {
+    public List<BookingDto> getBookersBookings(long userId, String state) {
         validateUserById(userId);
-        switch (state) {
-            case ALL:
-                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId));
-            case PAST:
-                return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
-            case FUTURE:
-                return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
-            case CURRENT:
-                return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
-            case WAITING:
-                return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
-            case REJECTED:
-                return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+        try {
+            switch (State.valueOf(state)) {
+                case ALL:
+                    return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId));
+                case PAST:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                case FUTURE:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                case CURRENT:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                case WAITING:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+                case REJECTED:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+            }
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedStatusException(String.format("Unknown state: %s", state));
         }
-        throw new RuntimeException("Что то пошло не так!");
+        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!"); // TODO разобраться с требуемой в тестах ошибкой!
     }
 
     private User validateUserById(long userId) {
