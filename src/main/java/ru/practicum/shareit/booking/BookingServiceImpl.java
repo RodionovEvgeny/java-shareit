@@ -6,6 +6,7 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.BookingAlreadyApprovedException;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.InappropriateTimeException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
@@ -58,7 +59,10 @@ public class BookingServiceImpl implements BookingService {
                 Booking.class.getName()));
         if (userId != booking.getItem().getOwner()) {
             throw new NoAccessException("Подтверждение бронирования разрешено только владельцу предмета!");
-        } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
+        }
+        if (!BookingStatus.WAITING.name().equals(booking.getStatus())) {
+            throw new BookingAlreadyApprovedException("Бронирование уже подтверждено/отменено!");
+        }
         if (approved) booking.setStatus(BookingStatus.APPROVED.name());
         else booking.setStatus(BookingStatus.REJECTED.name());
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
