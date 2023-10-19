@@ -66,8 +66,31 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingDto> getOwnersBookings(long userId, String state) {
-        //TODO надо таки добавлять связи! А то без них будет выглядеть уродски ;
-        return null;
+        validateUserById(userId);
+        try {
+            switch (State.valueOf(state)) {
+                case ALL:
+                    return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerOrderByStartDesc(userId));
+                case PAST:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByItemOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                case FUTURE:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                case CURRENT:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                case WAITING:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+                case REJECTED:
+                    return BookingMapper.toBookingDtoList(
+                            bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+            }
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedStatusException(String.format("Unknown state: %s", state));
+        }
+        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!"); // TODO разобраться с требуемой в тестах ошибкой!
     }
 
     @Override
