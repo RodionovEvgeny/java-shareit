@@ -152,5 +152,17 @@ public class BookingServiceImpl implements BookingService {
                 bookingDto.getEnd().isBefore(Timestamp.from(Instant.now()).toLocalDateTime())) {
             throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
         }
+        List<Booking> bookings = bookingRepository.findByItemIdAndStatusOrderByStartDesc(bookingDto.getItemId(),
+                BookingStatus.APPROVED.name());
+        for (Booking booking : bookings) {
+            if ((bookingDto.getStart().isBefore(booking.getStart()) && bookingDto.getEnd().isAfter(booking.getStart())) ||
+                    (bookingDto.getStart().isAfter(booking.getStart()) && bookingDto.getStart().isBefore(booking.getEnd())) ||
+                    (bookingDto.getStart().isEqual(booking.getStart()))
+            ) {
+                throw new InappropriateTimeException("Выбранное время для бронирования уже занято!");
+            }
+        }
+
+
     }
 }
