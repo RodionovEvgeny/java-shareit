@@ -58,4 +58,11 @@ public class ErrorHandler {
         log.warn(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDTO handleInappropriateUserException(final InappropriateUserException e) {
+        log.warn(e.getMessage());
+        return new ExceptionDTO(e.getMessage());
+    }
 }

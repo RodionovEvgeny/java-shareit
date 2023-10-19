@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.BookingAlreadyApprovedException;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.InappropriateTimeException;
+import ru.practicum.shareit.exceptions.InappropriateUserException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.exceptions.NoAccessException;
 import ru.practicum.shareit.exceptions.UnsupportedStatusException;
@@ -32,7 +33,11 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto addBooking(long userId, BookingDto bookingDto) {
         User user = validateUserById(userId);
+        bookingDto.setBooker(user);
         Item item = validateItemById(bookingDto.getItemId());
+        if (item.getOwner() == userId) {
+            throw new InappropriateUserException("Владелец не может бронировать свою вещь!");
+        }
         validateBookingsDates(bookingDto);
         bookingDto.setStatus(BookingStatus.WAITING);
         Booking booking = bookingRepository.save(BookingMapper.toBooking(bookingDto, user, item));
@@ -152,8 +157,8 @@ public class BookingServiceImpl implements BookingService {
                 bookingDto.getEnd().isBefore(Timestamp.from(Instant.now()).toLocalDateTime())) {
             throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
         }
-        List<Booking> bookings = bookingRepository.findByItemIdAndStatusOrderByStartDesc(bookingDto.getItemId(),
-                BookingStatus.APPROVED.name());
+        List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(bookingDto.getItemId()
+               );
         for (Booking booking : bookings) {
             if ((bookingDto.getStart().isBefore(booking.getStart()) && bookingDto.getEnd().isAfter(booking.getStart())) ||
                     (bookingDto.getStart().isAfter(booking.getStart()) && bookingDto.getStart().isBefore(booking.getEnd())) ||
@@ -161,6 +166,9 @@ public class BookingServiceImpl implements BookingService {
             ) {
                 throw new InappropriateTimeException("Выбранное время для бронирования уже занято!");
             }
+           /* if (booking.getBooker().getId() == bookingDto.getBooker().getId()) {
+                throw new InappropriateTimeException("Данный пользователь уже бронировал данный предмет!");
+            }*/
         }
 
 
