@@ -49,10 +49,25 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto getItemById(long itemId) {
-        return ItemMapper.toItemDto(itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
+    public ItemDtoWithBookings getItemById(long userId, long itemId) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Предмет с id = %s не найден!", itemId),
-                Item.class.getName())));
+                Item.class.getName()));
+        if (userId == item.getOwner()) {
+            List<Booking> futureBookings = bookingRepository.getFutureBookings(LocalDateTime.now(), item.getId());
+            List<Booking> pastBookings = bookingRepository.getPastBookings(LocalDateTime.now(), item.getId());
+
+            BookingDto nextBooking = futureBookings.isEmpty() ? null : BookingMapper.toBookingDto(futureBookings.get(0));
+            BookingDto lastBooking = pastBookings.isEmpty() ? null : BookingMapper.toBookingDto(pastBookings.get(0));
+            if (nextBooking != null) {
+                nextBooking.setBookerId(nextBooking.getBooker().getId());
+            }
+            if (lastBooking != null) {
+                lastBooking.setBookerId(lastBooking.getBooker().getId());
+            }
+            return ItemMapper.toItemDtoWithBookings(item, nextBooking, lastBooking);
+        }
+        return ItemMapper.toItemDtoWithBookings(item, null, null);
     }
 
     @Override
