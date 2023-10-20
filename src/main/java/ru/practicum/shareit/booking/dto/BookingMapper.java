@@ -30,7 +30,6 @@ public class BookingMapper {
                 .booker(booking.getBooker())
                 .status(BookingStatus.valueOf(booking.getStatus()))
                 .build();
-
     }
 
     public static List<BookingDto> toBookingDtoList(List<Booking> bookings) {
