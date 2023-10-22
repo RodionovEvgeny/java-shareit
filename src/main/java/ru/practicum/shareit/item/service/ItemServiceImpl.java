@@ -5,13 +5,19 @@ import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.exceptions.InappropriateCommentException;
 import ru.practicum.shareit.exceptions.NoAccessException;
+import ru.practicum.shareit.item.Comment;
 import ru.practicum.shareit.item.Item;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemDtoWithBookings;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -26,6 +32,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
@@ -98,9 +105,33 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDtoList(itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text));
     }
 
+    @Override
+    public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
+        validateUserById(userId);
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Предмет с id = %s не найден!", itemId),
+                Item.class.getName()));
+        validateCommentAuthor(userId, item);
+        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto,userId,itemId));
+        return CommentMapper.toCommentDto(comment);
+    }
+
     private void validateUserById(long userId) {
         userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Пользователь с id = %s не найден!", userId),
                 User.class.getName()));
+    }
+
+    private void validateCommentAuthor(long userId, Item item) {
+        List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(item.getId());
+        long appropriateBookingsCount = bookings.stream()
+                .filter(booking -> booking.getBooker().getId() == userId)
+                .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED.name()))
+                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
+                .count();
+        if (appropriateBookingsCount<1) {
+            throw new InappropriateCommentException("Комментарии могут оставлять только после пользователи, " +
+                    " бравшие в аренду предмет, после окончания аренды.");
+        }
     }
 }

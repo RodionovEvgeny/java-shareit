@@ -65,4 +65,11 @@ public class ErrorHandler {
         log.warn(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDTO handleInappropriateCommentException(final InappropriateCommentException e) {
+        log.warn(e.getMessage());
+        return new ExceptionDTO(e.getMessage());
+    }
 }
