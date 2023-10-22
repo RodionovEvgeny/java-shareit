@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.ItemDtoWithBookings;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
@@ -40,13 +39,13 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDtoWithBookings getItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                                       @PathVariable(name = "itemId") long itemId) {
+    public ItemDto getItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                           @PathVariable(name = "itemId") long itemId) {
         return itemService.getItemById(userId, itemId);
     }
 
     @GetMapping
-    public List<ItemDtoWithBookings> getOwnersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDto> getOwnersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
         return itemService.getOwnersItems(userId);
     }
 
@@ -55,6 +54,7 @@ public class ItemController {
                                    @RequestParam(value = "text") String text) {
         return itemService.findItems(text);
     }
+
     @PostMapping("/{itemId}/comment")
     public CommentDto addItem(@RequestHeader("X-Sharer-User-Id") long userId,
                               @PathVariable(name = "itemId") long itemId,
