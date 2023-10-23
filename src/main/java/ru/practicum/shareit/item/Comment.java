@@ -3,11 +3,14 @@ package ru.practicum.shareit.item;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Tolerate;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
@@ -20,8 +23,12 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String text;
-    private Long author;
-    private Long item;
+    @ManyToOne
+    @JoinColumn(name = "author")
+    private User author;
+    @ManyToOne
+    @JoinColumn(name = "item")
+    private Item item;
     private LocalDateTime created;
 
     @Tolerate

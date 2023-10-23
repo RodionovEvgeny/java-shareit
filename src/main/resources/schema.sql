@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS comments (
     text varchar(500) NOT NULL,
     item long   NOT NULL,
     author long   NOT NULL,
-    created timestamp without time zone NOT NULL,
+    created timestamp without time zone,
     CONSTRAINT fk_comments_item FOREIGN KEY(item) REFERENCES items (id),
     CONSTRAINT fk_comments_author FOREIGN KEY(author) REFERENCES users (id)
 );

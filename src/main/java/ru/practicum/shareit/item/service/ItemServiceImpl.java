@@ -60,7 +60,8 @@ public class ItemServiceImpl implements ItemService {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Предмет с id = %s не найден!", itemId),
                 Item.class.getName()));
-        return userId == item.getOwner() ? addBookingToItem(item) : ItemMapper.toItemDto(item);
+        ItemDto itemDto = userId == item.getOwner() ? addBookingToItem(item) : ItemMapper.toItemDto(item);
+        return addCommentsToItemDto(itemDto);
     }
 
     @Override
@@ -69,6 +70,7 @@ public class ItemServiceImpl implements ItemService {
         List<Item> items = itemRepository.findByOwner(userId);
         return items.stream()
                 .map(this::addBookingToItem)
+                .map(this::addCommentsToItemDto)
                 .collect(Collectors.toList());
     }
 
@@ -80,17 +82,19 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
-        validateUserById(userId);
+        User user = validateUserById(userId);
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Предмет с id = %s не найден!", itemId),
                 Item.class.getName()));
         validateCommentAuthor(userId, item);
-        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, userId, itemId));
+        commentDto.setCreated(LocalDateTime.now());
+        System.out.println("sodkifjh");
+        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, user, item));
         return CommentMapper.toCommentDto(comment);
     }
 
-    private void validateUserById(long userId) {
-        userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+    private User validateUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
                 String.format("Пользователь с id = %s не найден!", userId),
                 User.class.getName()));
     }
@@ -121,5 +125,11 @@ public class ItemServiceImpl implements ItemService {
             lastBooking.setBookerId(lastBooking.getBooker().getId());
         }
         return ItemMapper.toItemDtoWithBookings(item, nextBooking, lastBooking);
+    }
+
+    private ItemDto addCommentsToItemDto(ItemDto itemDto) {
+        List<Comment> comments = commentRepository.findByItemId(itemDto.getId());
+        itemDto.setComments(CommentMapper.toCommentDtoList(comments));
+        return itemDto;
     }
 }
