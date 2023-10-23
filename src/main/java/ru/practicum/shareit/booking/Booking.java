@@ -16,9 +16,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
 
-/**
- * TODO Sprint add-bookings.
- */
 @Entity
 @Table(name = "bookings")
 @Data
@@ -34,8 +31,6 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "item")
     private Item item;
-
-
     @ManyToOne
     @JoinColumn(name = "booker")
     private User booker;

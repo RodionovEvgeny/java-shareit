@@ -33,24 +33,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "WHERE b.start < ?1 " +
-            //   "AND b.item.owner = ?2 " +
             "AND b.item.id = ?2 " +
             "AND b.status = 'APPROVED' " +
             "ORDER BY b.start DESC")
-    List<Booking> getPastBookings(LocalDateTime time,
-                                  //   Long userId,
-                                  Long itemId);
+    List<Booking> getPastBookings(LocalDateTime time, Long itemId);
 
 
     @Query("SELECT b " +
             "FROM Booking AS b " +
             "WHERE b.start > ?1 " +
-            //  "AND b.item.owner = ?2 " +
             "AND b.item.id = ?2 " +
             "AND b.status = 'APPROVED' " +
             "ORDER BY b.start ASC")
-    List<Booking> getFutureBookings(LocalDateTime time,
-                                    //   Long userId,
-                                    Long itemId);
-
+    List<Booking> getFutureBookings(LocalDateTime time, Long itemId);
 }

@@ -7,7 +7,6 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -25,5 +24,5 @@ public class ItemDto {
     private Long request;
     private BookingDto lastBooking;
     private BookingDto nextBooking;
-    private List<CommentDto> comments = new ArrayList<>();
+    private List<CommentDto> comments;
 }

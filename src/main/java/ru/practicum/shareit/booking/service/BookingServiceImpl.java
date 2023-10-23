@@ -1,7 +1,9 @@
-package ru.practicum.shareit.booking;
+package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
 import ru.practicum.shareit.booking.dto.BookingStatus;
@@ -47,21 +49,17 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto getBookingById(long userId, long bookingId) {
         validateUserById(userId);
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Бронирование с id = %s не найдено!", bookingId),
-                Booking.class.getName()));
+        Booking booking = validateBookingById(bookingId);
         if (userId != booking.getBooker().getId() && userId != booking.getItem().getOwner()) {
             throw new NoAccessException("Просмотр бронирования разрешен только автору или владельцу предмета!");
-        } // TODO переписать через связи а то выглядит очень по уродски! Или хотябы в метод вынести получение предмета
+        }
         return BookingMapper.toBookingDto(booking);
     }
 
     @Override
     public BookingDto approveBooking(long userId, long bookingId, boolean approved) {
         validateUserById(userId);
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Бронирование с id = %s не найдено!", bookingId),
-                Booking.class.getName()));
+        Booking booking = validateBookingById(bookingId);
         if (userId != booking.getItem().getOwner()) {
             throw new NoAccessException("Подтверждение бронирования разрешено только владельцу предмета!");
         }
@@ -76,59 +74,51 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getOwnersBookings(long userId, String state) {
         validateUserById(userId);
-        try {
-            switch (State.valueOf(state)) {
-                case ALL:
-                    return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerOrderByStartDesc(userId));
-                case PAST:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByItemOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
-                case FUTURE:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
-                case CURRENT:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
-                case WAITING:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
-                case REJECTED:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
-            }
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedStatusException(String.format("Unknown state: %s", state));
+        switch (parseState(state)) {
+            case ALL:
+                return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerOrderByStartDesc(userId));
+            case PAST:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByItemOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+            case FUTURE:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+            case CURRENT:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+            case WAITING:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+            case REJECTED:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
         }
-        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!"); // TODO разобраться с требуемой в тестах ошибкой!
+        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!");
     }
 
     @Override
     public List<BookingDto> getBookersBookings(long userId, String state) {
         validateUserById(userId);
-        try {
-            switch (State.valueOf(state)) {
-                case ALL:
-                    return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId));
-                case PAST:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
-                case FUTURE:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
-                case CURRENT:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
-                case WAITING:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
-                case REJECTED:
-                    return BookingMapper.toBookingDtoList(
-                            bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
-            }
-        } catch (IllegalArgumentException e) {
-            throw new UnsupportedStatusException(String.format("Unknown state: %s", state));
+        switch (parseState(state)) {
+            case ALL:
+                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId));
+            case PAST:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+            case FUTURE:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+            case CURRENT:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+            case WAITING:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+            case REJECTED:
+                return BookingMapper.toBookingDtoList(
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
         }
-        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!"); // TODO разобраться с требуемой в тестах ошибкой!
+        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!");
     }
 
     private User validateUserById(long userId) {
@@ -146,6 +136,20 @@ public class BookingServiceImpl implements BookingService {
         return item;
     }
 
+    private Booking validateBookingById(long bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Бронирование с id = %s не найдено!", bookingId),
+                Booking.class.getName()));
+    }
+
+    private State parseState(String state) {
+        try {
+            return State.valueOf(state);
+        } catch (IllegalArgumentException e) {
+            throw new UnsupportedStatusException(String.format("Unknown state: %s", state));
+        }
+    }
+
     private void validateBookingsDates(BookingDto bookingDto) {
         if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
             throw new InappropriateTimeException("Необходимо указать время начала и окончания бронирования!");
@@ -158,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
             throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
         }
         List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(bookingDto.getItemId()
-               );
+        );
         for (Booking booking : bookings) {
             if ((bookingDto.getStart().isBefore(booking.getStart()) && bookingDto.getEnd().isAfter(booking.getStart())) ||
                     (bookingDto.getStart().isAfter(booking.getStart()) && bookingDto.getStart().isBefore(booking.getEnd())) ||
@@ -166,11 +170,6 @@ public class BookingServiceImpl implements BookingService {
             ) {
                 throw new InappropriateTimeException("Выбранное время для бронирования уже занято!");
             }
-           /* if (booking.getBooker().getId() == bookingDto.getBooker().getId()) {
-                throw new InappropriateTimeException("Данный пользователь уже бронировал данный предмет!");
-            }*/
         }
-
-
     }
 }

@@ -44,9 +44,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         validateUserById(userId);
-        Item updatedItem = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Предмет с id = %s не найден!", itemId),
-                Item.class.getName()));
+        Item updatedItem = validateItemById(itemId);
         if (updatedItem.getOwner() != userId)
             throw new NoAccessException("Редактировать предмет может только его хозяин!");
         if (itemDto.getName() != null) updatedItem.setName(itemDto.getName());
@@ -57,9 +55,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto getItemById(long userId, long itemId) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Предмет с id = %s не найден!", itemId),
-                Item.class.getName()));
+        validateUserById(userId);
+        Item item = validateItemById(itemId);
         ItemDto itemDto = userId == item.getOwner() ? addBookingToItem(item) : ItemMapper.toItemDto(item);
         return addCommentsToItemDto(itemDto);
     }
@@ -77,18 +74,16 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public List<ItemDto> findItems(String text) {
         if (text == null || text.isBlank()) return new ArrayList<>();
-        return ItemMapper.toItemDtoList(itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text));
+        return ItemMapper.toItemDtoList(itemRepository
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text));
     }
 
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         User user = validateUserById(userId);
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Предмет с id = %s не найден!", itemId),
-                Item.class.getName()));
+        Item item = validateItemById(itemId);
         validateCommentAuthor(userId, item);
         commentDto.setCreated(LocalDateTime.now());
-        System.out.println("sodkifjh");
         Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, user, item));
         return CommentMapper.toCommentDto(comment);
     }
@@ -99,6 +94,12 @@ public class ItemServiceImpl implements ItemService {
                 User.class.getName()));
     }
 
+    private Item validateItemById(long itemId) {
+        return itemRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Предмет с id = %s не найден!", itemId),
+                Item.class.getName()));
+    }
+
     private void validateCommentAuthor(long userId, Item item) {
         List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(item.getId());
         long appropriateBookingsCount = bookings.stream()
@@ -107,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
                 .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
                 .count();
         if (appropriateBookingsCount < 1) {
-            throw new InappropriateCommentException("Комментарии могут оставлять только после пользователи, " +
+            throw new InappropriateCommentException("Комментарии могут оставлять только пользователи, " +
                     " бравшие в аренду предмет, после окончания аренды.");
         }
     }

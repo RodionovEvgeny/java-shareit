@@ -1,13 +1,13 @@
 package ru.practicum.shareit.exceptions;
 
 public class ExceptionDTO {
-    private final String massage;
+    private final String error;
 
-    public ExceptionDTO(String massage) {
-        this.massage = massage;
+    public ExceptionDTO(String error) {
+        this.error = error;
     }
 
-    public String getMassage() {
-        return massage;
+    public String getError() {
+        return error;
     }
 }

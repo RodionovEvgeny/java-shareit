@@ -13,23 +13,18 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-//@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
-    //@Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
-        //validateEmail(userDto);
         User user = userRepository.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User updatedUser = userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Пользователь с id = %s не найден!", userId),
-                User.class.getName()));
+        User updatedUser = validateUserById(userId);
         if (!updatedUser.getEmail().equals(userDto.getEmail())) validateEmail(userDto);
         if (userDto.getName() != null) updatedUser.setName(userDto.getName());
         if (userDto.getEmail() != null) updatedUser.setEmail(userDto.getEmail());
@@ -38,9 +33,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(Long userId) {
-        return UserMapper.toUserDto(userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
-                String.format("Пользователь с id = %s не найден!", userId),
-                User.class.getName())));
+        return UserMapper.toUserDto(validateUserById(userId));
     }
 
     @Override
@@ -50,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUserById(Long userId) {
-        userRepository.findById(userId);
+        validateUserById(userId);
         userRepository.deleteById(userId);
     }
 
@@ -60,5 +53,11 @@ public class UserServiceImpl implements UserService {
                     String.format("Пользователь с Email = %s уже существует!",
                             userDto.getEmail()));
         }
+    }
+
+    private User validateUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Пользователь с id = %s не найден!", userId),
+                User.class.getName()));
     }
 }
