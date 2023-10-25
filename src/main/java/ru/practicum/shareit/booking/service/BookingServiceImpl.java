@@ -14,6 +14,7 @@ import ru.practicum.shareit.exceptions.InappropriateTimeException;
 import ru.practicum.shareit.exceptions.InappropriateUserException;
 import ru.practicum.shareit.exceptions.ItemNotAvailableException;
 import ru.practicum.shareit.exceptions.NoAccessException;
+import ru.practicum.shareit.exceptions.UnknownBookingException;
 import ru.practicum.shareit.exceptions.UnsupportedStatusException;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -92,8 +93,9 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 return BookingMapper.toBookingDtoList(
                         bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+            default:
+                throw new UnknownBookingException("Неизвестная ошибка при получении списка бронирований!");
         }
-        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!");
     }
 
     @Override
@@ -117,8 +119,9 @@ public class BookingServiceImpl implements BookingService {
             case REJECTED:
                 return BookingMapper.toBookingDtoList(
                         bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+            default:
+                throw new UnknownBookingException("Неизвестная ошибка при получении списка бронирований!");
         }
-        throw new RuntimeException("Неизвестная ошибка при получении списка бронирований!");
     }
 
     private User validateUserById(long userId) {
