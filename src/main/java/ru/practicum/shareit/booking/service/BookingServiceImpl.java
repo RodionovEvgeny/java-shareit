@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.State;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -33,6 +34,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
+    @Transactional
     @Override
     public BookingDto addBooking(long userId, BookingDto bookingDto) {
         User user = validateUserById(userId);
@@ -47,6 +49,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(booking);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public BookingDto getBookingById(long userId, long bookingId) {
         validateUserById(userId);
@@ -57,6 +60,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(booking);
     }
 
+    @Transactional
     @Override
     public BookingDto approveBooking(long userId, long bookingId, boolean approved) {
         validateUserById(userId);
@@ -72,6 +76,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingMapper.toBookingDto(bookingRepository.save(booking));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BookingDto> getOwnersBookings(long userId, String state) {
         validateUserById(userId);
@@ -98,6 +103,7 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<BookingDto> getBookersBookings(long userId, String state) {
         validateUserById(userId);

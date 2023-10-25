@@ -2,6 +2,7 @@ package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
@@ -34,6 +35,7 @@ public class ItemServiceImpl implements ItemService {
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
 
+    @Transactional
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
         User user = validateUserById(userId);
@@ -41,6 +43,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(item);
     }
 
+    @Transactional
     @Override
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         validateUserById(userId);
@@ -53,6 +56,7 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDto(itemRepository.save(updatedItem));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public ItemDto getItemById(long userId, long itemId) {
         validateUserById(userId);
@@ -61,6 +65,7 @@ public class ItemServiceImpl implements ItemService {
         return addCommentsToItemDto(itemDto);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> getOwnersItems(long userId) {
         validateUserById(userId);
@@ -71,6 +76,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ItemDto> findItems(String text) {
         if (text == null || text.isBlank()) return new ArrayList<>();
@@ -78,6 +84,7 @@ public class ItemServiceImpl implements ItemService {
                 .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text));
     }
 
+    @Transactional
     @Override
     public CommentDto addComment(long userId, long itemId, CommentDto commentDto) {
         User user = validateUserById(userId);
