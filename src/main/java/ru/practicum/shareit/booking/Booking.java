@@ -1,8 +1,9 @@
 package ru.practicum.shareit.booking;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.Tolerate;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
 
@@ -20,6 +21,8 @@ import java.time.LocalDateTime;
 @Table(name = "bookings")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,8 +38,4 @@ public class Booking {
     @JoinColumn(name = "booker")
     private User booker;
     private String status;
-
-    @Tolerate
-    public Booking() {
-    }
 }

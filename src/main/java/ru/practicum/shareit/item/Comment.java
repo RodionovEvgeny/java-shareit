@@ -1,8 +1,9 @@
 package ru.practicum.shareit.item;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.experimental.Tolerate;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.Entity;
@@ -18,6 +19,8 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,8 +33,4 @@ public class Comment {
     @JoinColumn(name = "item")
     private Item item;
     private LocalDateTime created;
-
-    @Tolerate
-    public Comment() {
-    }
 }

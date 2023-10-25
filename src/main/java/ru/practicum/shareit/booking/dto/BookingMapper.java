@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.AllArgsConstructor;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.user.User;
@@ -8,7 +7,6 @@ import ru.practicum.shareit.user.User;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 public class BookingMapper {
     public static Booking toBooking(BookingDto bookingDto, User user, Item item) {
         return Booking.builder()
