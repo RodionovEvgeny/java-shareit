@@ -38,7 +38,7 @@ public class BookingServiceImpl implements BookingService {
         User user = validateUserById(userId);
         bookingDto.setBooker(user);
         Item item = validateItemById(bookingDto.getItemId());
-        if (item.getOwner() == userId) {
+        if (item.getOwner().getId() == userId) {
             throw new InappropriateUserException("Владелец не может бронировать свою вещь!");
         }
         validateBookingsDates(bookingDto);
@@ -51,7 +51,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(long userId, long bookingId) {
         validateUserById(userId);
         Booking booking = validateBookingById(bookingId);
-        if (userId != booking.getBooker().getId() && userId != booking.getItem().getOwner()) {
+        if (userId != booking.getBooker().getId() && userId != booking.getItem().getOwner().getId()) {
             throw new NoAccessException("Просмотр бронирования разрешен только автору или владельцу предмета!");
         }
         return BookingMapper.toBookingDto(booking);
@@ -61,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto approveBooking(long userId, long bookingId, boolean approved) {
         validateUserById(userId);
         Booking booking = validateBookingById(bookingId);
-        if (userId != booking.getItem().getOwner()) {
+        if (userId != booking.getItem().getOwner().getId()) {
             throw new NoAccessException("Подтверждение бронирования разрешено только владельцу предмета!");
         }
         if (!BookingStatus.WAITING.name().equals(booking.getStatus())) {
@@ -77,22 +77,22 @@ public class BookingServiceImpl implements BookingService {
         validateUserById(userId);
         switch (parseState(state)) {
             case ALL:
-                return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerOrderByStartDesc(userId));
+                return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerIdOrderByStartDesc(userId));
             case PAST:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
             case FUTURE:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
             case CURRENT:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                        bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
             case WAITING:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
             case REJECTED:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
             default:
                 throw new UnknownBookingException("Неизвестная ошибка при получении списка бронирований!");
         }

@@ -27,10 +27,10 @@ public class Comment {
     private long id;
     private String text;
     @ManyToOne
-    @JoinColumn(name = "author")
+    @JoinColumn(name = "author_id")
     private User author;
     @ManyToOne
-    @JoinColumn(name = "item")
+    @JoinColumn(name = "item_id")
     private Item item;
     private LocalDateTime created;
 }

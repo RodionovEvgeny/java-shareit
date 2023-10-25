@@ -36,8 +36,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
-        validateUserById(userId);
-        Item item = itemRepository.save(ItemMapper.toItem(itemDto, userId));
+        User user = validateUserById(userId);
+        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
         return ItemMapper.toItemDto(item);
     }
 
@@ -45,7 +45,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto updateItem(long userId, long itemId, ItemDto itemDto) {
         validateUserById(userId);
         Item updatedItem = validateItemById(itemId);
-        if (updatedItem.getOwner() != userId)
+        if (updatedItem.getOwner().getId() != userId)
             throw new NoAccessException("Редактировать предмет может только его хозяин!");
         if (itemDto.getName() != null) updatedItem.setName(itemDto.getName());
         if (itemDto.getDescription() != null) updatedItem.setDescription(itemDto.getDescription());
@@ -57,14 +57,14 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto getItemById(long userId, long itemId) {
         validateUserById(userId);
         Item item = validateItemById(itemId);
-        ItemDto itemDto = userId == item.getOwner() ? addBookingToItem(item) : ItemMapper.toItemDto(item);
+        ItemDto itemDto = userId == item.getOwner().getId() ? addBookingToItem(item) : ItemMapper.toItemDto(item);
         return addCommentsToItemDto(itemDto);
     }
 
     @Override
     public List<ItemDto> getOwnersItems(long userId) {
         validateUserById(userId);
-        List<Item> items = itemRepository.findByOwner(userId);
+        List<Item> items = itemRepository.findByOwnerId(userId);
         return items.stream()
                 .map(this::addBookingToItem)
                 .map(this::addCommentsToItemDto)
