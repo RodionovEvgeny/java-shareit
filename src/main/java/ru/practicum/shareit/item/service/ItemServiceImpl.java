@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
-import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.InappropriateCommentException;
@@ -108,12 +107,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private void validateCommentAuthor(long userId, Item item) {
-        List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(item.getId());
-        long appropriateBookingsCount = bookings.stream()
-                .filter(booking -> booking.getBooker().getId() == userId)
-                .filter(booking -> booking.getStatus().equals(BookingStatus.APPROVED.name()))
-                .filter(booking -> booking.getEnd().isBefore(LocalDateTime.now()))
-                .count();
+        int appropriateBookingsCount = bookingRepository.countCompletedBookingByUserIdAndItemId(
+                userId,
+                item.getId(),
+                LocalDateTime.now());
+
         if (appropriateBookingsCount < 1) {
             throw new InappropriateCommentException("Комментарии могут оставлять только пользователи, " +
                     " бравшие в аренду предмет, после окончания аренды.");

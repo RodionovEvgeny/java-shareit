@@ -46,4 +46,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "AND b.status = 'APPROVED' " +
             "ORDER BY b.start ASC")
     List<Booking> getFutureBookings(LocalDateTime time, Long itemId);
+
+    @Query("SELECT COUNT(*) " +
+            "FROM Booking AS b " +
+            "WHERE b.booker.id = ?1 " +
+            "AND b.item.id = ?2 " +
+            "AND  b.end < ?3 ")
+    int countCompletedBookingByUserIdAndItemId(Long itemId, Long userId, LocalDateTime time);
 }
