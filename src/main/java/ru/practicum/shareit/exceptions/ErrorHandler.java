@@ -9,73 +9,44 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler
+
+    @ExceptionHandler({NoAccessException.class,
+            InappropriateUserException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDTO handleNotFoundException(final EntityNotFoundException e) {
+    public ExceptionDTO handleSimpleNotFoundException(final Exception e) {
+        log.error(e.getMessage());
+        return new ExceptionDTO(e.getMessage());
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDTO handleEntityNotFoundException(final EntityNotFoundException e) {
         log.error(String.format("Не найден объект класса %s.", e.getNotFoundClassName()));
         log.error(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDTO handleNoAccessException(final NoAccessException e) {
+    @ExceptionHandler({ItemNotAvailableException.class,
+            InappropriateTimeException.class,
+            UnsupportedStatusException.class,
+            BookingAlreadyApprovedException.class,
+            InappropriateCommentException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDTO handleBadRequestException(final Exception e) {
         log.error(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ExceptionDTO handleEmailAlreadyExistsException(final EmailAlreadyExistsException e) {
+    public ExceptionDTO handleConflictException(final Exception e) {
         log.error(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDTO handleItemNotAvailableException(final ItemNotAvailableException e) {
-        log.error(e.getMessage());
-        return new ExceptionDTO(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDTO handleInappropriateTimeException(final InappropriateTimeException e) {
-        log.error(e.getMessage());
-        return new ExceptionDTO(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDTO handleUnsupportedStatusException(final UnsupportedStatusException e) {
-        log.error(e.getMessage());
-        return new ExceptionDTO(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDTO handleBookingAlreadyApprovedException(final BookingAlreadyApprovedException e) {
-        log.error(e.getMessage());
-        return new ExceptionDTO(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ExceptionDTO handleInappropriateUserException(final InappropriateUserException e) {
-        log.error(e.getMessage());
-        return new ExceptionDTO(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDTO handleInappropriateCommentException(final InappropriateCommentException e) {
-        log.error(e.getMessage());
-        return new ExceptionDTO(e.getMessage());
-    }
-
-    @ExceptionHandler
+    @ExceptionHandler(UnknownBookingException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionDTO handleUnknownBookingException(final UnknownBookingException e) {
+    public ExceptionDTO handleInternalServerErrorException(final Exception e) {
         log.error(e.getMessage());
         return new ExceptionDTO(e.getMessage());
     }
