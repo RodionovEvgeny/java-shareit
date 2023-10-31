@@ -39,13 +39,6 @@ public class RequestServiceImpl implements RequestService {
     private final CommentRepository commentRepository;
     private final ItemRequestRepository itemRequestRepository;
 
-    @Transactional
-
-    public ItemDto addItem(long userId, ItemDto itemDto) {
-        User user = validateUserById(userId);
-        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
-        return ItemMapper.toItemDto(item);
-    }
 
     @Transactional
 
