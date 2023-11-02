@@ -42,7 +42,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<ItemRequestDtoWithAnswers> getOwnersItemRequests(long userId) {
         validateUserById(userId);
-        List<ItemRequest> itemRequests = itemRequestRepository.findByRequestorId(userId);
+        List<ItemRequest> itemRequests = itemRequestRepository.findByRequestorIdOrderByCreatedDesc(userId);
         return itemRequests.stream()
                 .map(this::addAnswerItems)
                 .collect(Collectors.toList());

@@ -33,7 +33,4 @@ public class ItemRequest {
     @JoinColumn(name = "requestor_id")
     private User requestor;
     private LocalDateTime created;
-//@OneToMany
-//@JoinColumn(name = "requestor_id")
-    // private List<Item> items;
 }
