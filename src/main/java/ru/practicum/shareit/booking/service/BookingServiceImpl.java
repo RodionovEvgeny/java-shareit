@@ -1,6 +1,8 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -78,26 +80,27 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDto> getOwnersBookings(long userId, String state) {
+    public List<BookingDto> getOwnersBookings(long userId, String state, int from, int size) {
         validateUserById(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
         switch (parseState(state)) {
             case ALL:
-                return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerIdOrderByStartDesc(userId));
+                return BookingMapper.toBookingDtoList(bookingRepository.findByItemOwnerIdOrderByStartDesc(pageable, userId));
             case PAST:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(pageable, userId, LocalDateTime.now()));
             case FUTURE:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(pageable, userId, LocalDateTime.now()));
             case CURRENT:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                        bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(pageable, userId, LocalDateTime.now(), LocalDateTime.now()));
             case WAITING:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(pageable, userId, BookingStatus.WAITING.name()));
             case REJECTED:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(pageable, userId, BookingStatus.REJECTED.name()));
             default:
                 throw new UnknownBookingException("Неизвестная ошибка при получении списка бронирований!");
         }
@@ -105,26 +108,27 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<BookingDto> getBookersBookings(long userId, String state) {
+    public List<BookingDto> getBookersBookings(long userId, String state, int from, int size) {
         validateUserById(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
         switch (parseState(state)) {
             case ALL:
-                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(userId));
+                return BookingMapper.toBookingDtoList(bookingRepository.findByBookerIdOrderByStartDesc(pageable, userId));
             case PAST:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(pageable, userId, LocalDateTime.now()));
             case FUTURE:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(userId, LocalDateTime.now()));
+                        bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(pageable, userId, LocalDateTime.now()));
             case CURRENT:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(userId, LocalDateTime.now(), LocalDateTime.now()));
+                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(pageable, userId, LocalDateTime.now(), LocalDateTime.now()));
             case WAITING:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING.name()));
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, BookingStatus.WAITING.name()));
             case REJECTED:
                 return BookingMapper.toBookingDtoList(
-                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.REJECTED.name()));
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(pageable, userId, BookingStatus.REJECTED.name()));
             default:
                 throw new UnknownBookingException("Неизвестная ошибка при получении списка бронирований!");
         }
