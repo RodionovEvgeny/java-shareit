@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.request.service.RequestService;
 
 import javax.validation.Valid;
@@ -31,7 +32,7 @@ public class ItemRequestController {
     }
 
     @GetMapping
-    public List<ItemRequestDto> getOwnersItemRequests(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemRequestDtoWithAnswers> getOwnersItemRequests(@RequestHeader("X-Sharer-User-Id") long userId) {
         return requestService.getOwnersItemRequests(userId);
     }
 
@@ -43,11 +44,8 @@ public class ItemRequestController {
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getItemRequest(
-            //       @RequestHeader("X-Sharer-User-Id") long userId,
-            @PathVariable(name = "itemId") long itemId) {
-        return requestService.getItemRequest(itemId);
+    public ItemRequestDtoWithAnswers getItemRequest(
+            @PathVariable(name = "requestId") long requestId) {
+        return requestService.getItemRequest(requestId);
     }
-
-
 }

@@ -21,6 +21,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.ItemRequestRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDtoWithAnswers;
 import ru.practicum.shareit.request.dto.ItemRequestMapper;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -137,6 +138,7 @@ public class RequestServiceImpl implements RequestService {
         return itemDto;
     }
 
+    @Transactional
     @Override
     public ItemRequestDto addItemRequest(long userId, ItemRequestDto itemRequestDto) {
         User user = validateUserById(userId);
@@ -145,9 +147,20 @@ public class RequestServiceImpl implements RequestService {
         return ItemRequestMapper.toItemRequestDto(itemRequest);
     }
 
+    @Transactional(readOnly = true)
     @Override
-    public List<ItemRequestDto> getOwnersItemRequests(long userId) {
-        return null;
+    public List<ItemRequestDtoWithAnswers> getOwnersItemRequests(long userId) {
+        User user = validateUserById(userId);
+        List<ItemRequest> itemRequests = itemRequestRepository.findByRequestorId(userId);
+
+        return itemRequests.stream()
+                .map(this::addAnswerItems)
+                .collect(Collectors.toList());
+    }
+
+    private ItemRequestDtoWithAnswers addAnswerItems(ItemRequest itemRequest) {
+        List<ItemDto> answerItems = ItemMapper.toItemDtoList(itemRepository.findByRequestId(itemRequest.getId()));
+        return ItemRequestMapper.toItemRequestDtoWithAnswers(itemRequest, answerItems);
     }
 
     @Override
@@ -156,7 +169,10 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public ItemRequestDto getItemRequest(long itemId) {
-        return null;
+    public ItemRequestDtoWithAnswers getItemRequest(long itemId) {
+        ItemRequest itemRequest = itemRequestRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
+                "Запрос с id = %s не найден!",
+                ItemRequest.class.getName()));
+        return addAnswerItems(itemRequest);
     }
 }
