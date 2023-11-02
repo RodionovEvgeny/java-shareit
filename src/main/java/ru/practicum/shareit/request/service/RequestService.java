@@ -12,8 +12,8 @@ public interface RequestService {
 
     List<ItemRequestDtoWithAnswers> getOwnersItemRequests(long userId);
 
-    List<ItemRequestDto> getAllItemRequests(long userId, int from, int size);
+    List<ItemRequestDtoWithAnswers> getAllItemRequests(long userId, int from, int size);
 
-    ItemRequestDtoWithAnswers getItemRequest(long itemId);
+    ItemRequestDtoWithAnswers getItemRequest(long userId, long itemId);
 }
 

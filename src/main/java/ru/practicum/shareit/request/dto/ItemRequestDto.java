@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ItemRequestDto {
     private long id;
-    @NotBlank
+    @NotBlank(message = "Описание не должно быть пустым.")
     private String description;
     private LocalDateTime created;
 }
