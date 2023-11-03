@@ -1,6 +1,9 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
@@ -74,9 +77,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getOwnersItems(long userId) {
+    public List<ItemDto> getOwnersItems(long userId, int from, int size) {
         validateUserById(userId);
-        List<Item> items = itemRepository.findByOwnerId(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
+        Page<Item> items = itemRepository.findByOwnerId(pageable, userId);
         return items.stream()
                 .map(this::addBookingToItem)
                 .map(this::addCommentsToItemDto)
@@ -85,10 +89,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> findItems(String text) {
+    public List<ItemDto> findItems(String text, int from, int size) {
         if (text == null || text.isBlank()) return new ArrayList<>();
+        Pageable pageable = PageRequest.of(from / size, size);
         return ItemMapper.toItemDtoList(itemRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text));
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(pageable, text, text));
     }
 
     @Transactional

@@ -16,6 +16,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 @Slf4j
@@ -45,14 +46,24 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getOwnersItems(@RequestHeader("X-Sharer-User-Id") long userId) {
-        return itemService.getOwnersItems(userId);
+    public List<ItemDto> getOwnersItems(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(value = "from", defaultValue = "0")
+            @Min(value = 0, message = "Номер запроса с которого начнется страница должен быть больше 0") int from,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Min(value = 1, message = "Размер страницы должен быть больше 0") int size) {
+        return itemService.getOwnersItems(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> findItems(@RequestHeader("X-Sharer-User-Id") long userId,
-                                   @RequestParam(value = "text") String text) {
-        return itemService.findItems(text);
+    public List<ItemDto> findItems(
+            @RequestHeader("X-Sharer-User-Id") long userId,
+            @RequestParam(value = "text") String text,
+            @RequestParam(value = "from", defaultValue = "0")
+            @Min(value = 0, message = "Номер запроса с которого начнется страница должен быть больше 0") int from,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Min(value = 1, message = "Размер страницы должен быть больше 0") int size) {
+        return itemService.findItems(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")
