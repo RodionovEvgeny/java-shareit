@@ -2,9 +2,9 @@ package ru.practicum.shareit.item.dto;
 
 import org.springframework.data.domain.Page;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.item.Item;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 import java.util.stream.Collectors;
