@@ -60,10 +60,10 @@ public class RequestServiceImpl implements RequestService {
 
     @Transactional(readOnly = true)
     @Override
-    public ItemRequestDtoWithAnswers getItemRequest(long userId, long itemId) {
+    public ItemRequestDtoWithAnswers getItemRequest(long userId, long itemRequestId) {
         validateUserById(userId);
-        ItemRequest itemRequest = itemRequestRepository.findById(itemId).orElseThrow(() -> new EntityNotFoundException(
-                "Запрос с id = %s не найден!",
+        ItemRequest itemRequest = itemRequestRepository.findById(itemRequestId).orElseThrow(() -> new EntityNotFoundException(
+                String.format("Запрос с id = %s не найден!", itemRequestId),
                 ItemRequest.class.getName()));
         return addAnswerItems(itemRequest);
     }
