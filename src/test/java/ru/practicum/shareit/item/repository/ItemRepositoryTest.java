@@ -26,35 +26,35 @@ class ItemRepositoryTest {
     @Autowired
     private ItemRequestRepository itemRequestRepository;
 
-    private User user1 = User.builder()
+    private final User user1 = User.builder()
             .name("User1")
             .email("Email1@email.com")
             .build();
 
-    private User user2 = User.builder()
+    private final User user2 = User.builder()
             .name("User2")
             .email("Email2@email.com")
             .build();
 
-    private ItemRequest itemRequest = ItemRequest.builder()
+    private final ItemRequest itemRequest = ItemRequest.builder()
             .requestor(user2)
             .description("request")
             .created(LocalDateTime.now())
             .build();
-    private Item item2 = Item.builder()
+    private final Item item2 = Item.builder()
             .name("Name2")
             .description("Motorcycle")
             .available(Boolean.TRUE)
             .owner(user1)
             .request(itemRequest)
             .build();
-    private Item item1 = Item.builder()
+    private final Item item1 = Item.builder()
             .name("Name1")
             .description("Car")
             .available(Boolean.TRUE)
             .owner(user1)
             .build();
-    private Item item3 = Item.builder()
+    private final Item item3 = Item.builder()
             .name("car")
             .description("Lamborghini")
             .available(Boolean.TRUE)

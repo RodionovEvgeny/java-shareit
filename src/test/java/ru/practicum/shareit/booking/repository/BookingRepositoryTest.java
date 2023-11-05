@@ -27,24 +27,24 @@ class BookingRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    private User owner = User.builder()
+    private final User owner = User.builder()
             .name("Owner")
             .email("Email1@email.com")
             .build();
 
-    private User booker = User.builder()
+    private final User booker = User.builder()
             .name("Booker")
             .email("Email2@email.com")
             .build();
 
-    private Item item = Item.builder()
+    private final Item item = Item.builder()
             .name("Name")
             .description("Description")
             .available(Boolean.TRUE)
             .owner(owner)
             .build();
 
-    private Booking booking = Booking.builder()
+    private final Booking booking = Booking.builder()
             .start(LocalDateTime.now().plusDays(1))
             .end(LocalDateTime.now().plusDays(3))
             .item(item)

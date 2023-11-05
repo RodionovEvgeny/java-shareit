@@ -22,25 +22,25 @@ class ItemRequestRepositoryTest {
     @Autowired
     private ItemRequestRepository itemRequestRepository;
 
-    private User user1 = User.builder()
+    private final User user1 = User.builder()
             .name("User1")
             .email("Email1@email.com")
             .build();
-    private User user2 = User.builder()
+    private final User user2 = User.builder()
             .name("User2")
             .email("Email2@email.com")
             .build();
-    private ItemRequest itemRequest1 = ItemRequest.builder()
+    private final ItemRequest itemRequest1 = ItemRequest.builder()
             .requestor(user1)
             .description("request1")
             .created(LocalDateTime.now().plusDays(5))
             .build();
-    private ItemRequest itemRequest2 = ItemRequest.builder()
+    private final ItemRequest itemRequest2 = ItemRequest.builder()
             .requestor(user1)
             .description("request2")
             .created(LocalDateTime.now().plusDays(4))
             .build();
-    private ItemRequest itemRequest3 = ItemRequest.builder()
+    private final ItemRequest itemRequest3 = ItemRequest.builder()
             .requestor(user2)
             .description("request3")
             .created(LocalDateTime.now().plusDays(3))

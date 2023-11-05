@@ -23,31 +23,31 @@ class CommentRepositoryTest {
     @Autowired
     private CommentRepository commentRepository;
 
-    private User owner = User.builder()
+    private final User owner = User.builder()
             .name("Owner")
             .email("Email1@email.com")
             .build();
 
-    private User commentator = User.builder()
+    private final User commentator = User.builder()
             .name("Commentator")
             .email("Email2@email.com")
             .build();
 
-    private Item item = Item.builder()
+    private final Item item = Item.builder()
             .name("Name")
             .description("Description")
             .available(Boolean.TRUE)
             .owner(owner)
             .build();
 
-    private Comment comment1 = Comment.builder()
+    private final Comment comment1 = Comment.builder()
             .text("Text1")
             .author(commentator)
             .item(item)
             .created(LocalDateTime.now().minusDays(1))
             .build();
 
-    private Comment comment2 = Comment.builder()
+    private final Comment comment2 = Comment.builder()
             .text("Text2")
             .author(commentator)
             .item(item)
