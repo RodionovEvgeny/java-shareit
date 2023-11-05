@@ -1,10 +1,7 @@
 package ru.practicum.shareit.exceptions;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import ru.practicum.shareit.item.model.Item;
-
-import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
