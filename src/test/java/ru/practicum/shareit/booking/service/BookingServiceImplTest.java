@@ -11,7 +11,9 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.BookingAlreadyApprovedException;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.exceptions.NoAccessException;
 import ru.practicum.shareit.exceptions.UnsupportedStatusException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -44,8 +46,6 @@ class BookingServiceImplTest {
 
     @Test
     void addBooking() {
-
-
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createItem()));
         when(bookingRepository.findByItemIdOrderByStartDesc(anyLong())).thenReturn(List.of());
@@ -114,6 +114,29 @@ class BookingServiceImplTest {
         assertEquals(1, bookingDto.getItem().getId());
         assertEquals(BookingStatus.WAITING, bookingDto.getStatus());
         assertEquals(1, bookingDto.getBooker().getId());
+    }
+
+    @Test
+    void approveBookingWithExceptions() {
+        Booking booking = createBooking();
+        booking.setStatus(BookingStatus.APPROVED.name());
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
+        when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(booking));
+
+        Exception exception = assertThrows(
+                NoAccessException.class,
+                () -> {
+                    bookingService.approveBooking(99, 1, Boolean.TRUE);
+                });
+        assertEquals("Подтверждение бронирования разрешено только владельцу предмета!", exception.getMessage());
+
+        exception = assertThrows(
+                BookingAlreadyApprovedException.class,
+                () -> {
+                    bookingService.approveBooking(1, 1, Boolean.TRUE);
+                });
+        assertEquals("Бронирование уже подтверждено/отменено!", exception.getMessage());
     }
 
     @Test
