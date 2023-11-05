@@ -54,5 +54,5 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "WHERE b.booker.id = ?1 " +
             "AND b.item.id = ?2 " +
             "AND  b.end < ?3 ")
-    int countCompletedBookingByUserIdAndItemId(Long itemId, Long userId, LocalDateTime time);
+    int countCompletedBookingByUserIdAndItemId(Long userId, Long itemId, LocalDateTime time);
 }
