@@ -5,7 +5,6 @@ import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ItemRequestMapper {
     public static ItemRequest toItemRequest(ItemRequestDto itemRequestDto, User requestor) {
@@ -32,12 +31,5 @@ public class ItemRequestMapper {
                 .created(itemRequest.getCreated())
                 .items(answerItems)
                 .build();
-    }
-
-
-    public static List<ItemRequestDto> toItemRequestDtoList(List<ItemRequest> itemRequests) {
-        return itemRequests.stream()
-                .map(ItemRequestMapper::toItemRequestDto)
-                .collect(Collectors.toList());
     }
 }

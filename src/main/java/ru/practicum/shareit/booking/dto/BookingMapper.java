@@ -31,12 +31,6 @@ public class BookingMapper {
                 .build();
     }
 
-    public static List<BookingDto> toBookingDtoList(List<Booking> bookings) {
-        return bookings.stream()
-                .map(BookingMapper::toBookingDto)
-                .collect(Collectors.toList());
-    }
-
     public static List<BookingDto> toBookingDtoList(Page<Booking> bookings) {
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)
