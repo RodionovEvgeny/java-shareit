@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -22,6 +23,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
@@ -92,6 +94,34 @@ class RequestServiceImplTest {
         assertEquals(1, itemRequestDto.getId());
         assertEquals("description", itemRequestDto.getDescription());
         assertNotNull(itemRequestDto.getItems());
+    }
+
+    @Test
+    void getItemRequestWithUserNotFoundException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.of(createItemRequest()));
+        when(itemRepository.findByRequestId(anyLong())).thenReturn(List.of(new Item()));
+
+        Exception exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> {
+                    requestService.getItemRequest(1, 1);
+                });
+        assertEquals("Пользователь с id = 1 не найден!", exception.getMessage());
+    }
+
+    @Test
+    void getItemRequestWithItemRequestNotFoundException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
+        when(itemRequestRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemRepository.findByRequestId(anyLong())).thenReturn(List.of(new Item()));
+
+        Exception exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> {
+                    requestService.getItemRequest(1, 1);
+                });
+        assertEquals("Запрос с id = 1 не найден!", exception.getMessage());
     }
 
     private ItemRequest createItemRequest() {
