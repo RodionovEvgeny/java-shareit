@@ -11,6 +11,8 @@ import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exceptions.EntityNotFoundException;
+import ru.practicum.shareit.exceptions.UnsupportedStatusException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -41,6 +44,8 @@ class BookingServiceImplTest {
 
     @Test
     void addBooking() {
+
+
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
         when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createItem()));
         when(bookingRepository.findByItemIdOrderByStartDesc(anyLong())).thenReturn(List.of());
@@ -52,6 +57,36 @@ class BookingServiceImplTest {
         assertEquals(1, bookingDto.getItem().getId());
         assertEquals(BookingStatus.WAITING, bookingDto.getStatus());
         assertEquals(1, bookingDto.getBooker().getId());
+    }
+
+    @Test
+    void addBookingWithUserNotFoundException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.of(createItem()));
+        when(bookingRepository.findByItemIdOrderByStartDesc(anyLong())).thenReturn(List.of());
+        when(bookingRepository.save(any(Booking.class))).thenReturn(createBooking());
+
+        Exception exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> {
+                    bookingService.addBooking(1, createBookingDto());
+                });
+        assertEquals("Пользователь с id = 1 не найден!", exception.getMessage());
+    }
+
+    @Test
+    void addBookingWithItemNotFoundException() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
+        when(itemRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(bookingRepository.findByItemIdOrderByStartDesc(anyLong())).thenReturn(List.of());
+        when(bookingRepository.save(any(Booking.class))).thenReturn(createBooking());
+
+        Exception exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> {
+                    bookingService.addBooking(1, createBookingDto());
+                });
+        assertEquals("Предмет с id = 1 не найден!", exception.getMessage());
     }
 
     @Test
@@ -135,6 +170,14 @@ class BookingServiceImplTest {
         bookingDtos = bookingService.getOwnersBookings(1, "REJECTED", 0, 10);
         assertEquals(1, bookingDtos.size());
         assertEquals(5, bookingDtos.get(0).getId());
+
+        Exception exception = assertThrows(
+                UnsupportedStatusException.class,
+                () -> {
+                    bookingService.getOwnersBookings(1, "badstate", 0, 10);
+                });
+        assertEquals("Unknown state: badstate", exception.getMessage());
+
     }
 
     @Test
