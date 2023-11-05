@@ -24,6 +24,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(BookingServiceImpl.class)
@@ -72,7 +73,7 @@ class BookingServiceImplTest {
         when(bookingRepository.findById(anyLong())).thenReturn(Optional.of(createBooking()));
         when(bookingRepository.save(any(Booking.class))).thenReturn(createBooking());
 
-        BookingDto bookingDto = bookingService.getBookingById(1, 1);
+        BookingDto bookingDto = bookingService.approveBooking(1, 1, Boolean.TRUE);
 
         assertEquals(1, bookingDto.getId());
         assertEquals(1, bookingDto.getItem().getId());
@@ -82,33 +83,115 @@ class BookingServiceImplTest {
 
     @Test
     void getOwnersBookings() {
+        Booking booking1 = createBooking();
+        Booking booking2 = createBooking();
+        Booking booking3 = createBooking();
+        Booking booking4 = createBooking();
+        Booking booking5 = createBooking();
+        booking1.setId(1);
+        booking2.setId(2);
+        booking3.setId(3);
+        booking4.setId(4);
+        booking5.setId(5);
+
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
-        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(any(Pageable.class), anyLong()))
-                .thenReturn(new PageImpl<>(List.of(createBooking())));
+        when(bookingRepository.findByItemOwnerIdOrderByStartDesc(
+                any(Pageable.class), anyLong()))
+                .thenReturn(new PageImpl<>(List.of(booking1)));
+        when(bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
+                any(Pageable.class), anyLong(), any(LocalDateTime.class)))
+                .thenReturn(new PageImpl<>(List.of(booking2)));
+        when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
+                any(Pageable.class), anyLong(), any(LocalDateTime.class)))
+                .thenReturn(new PageImpl<>(List.of(booking3)));
+        when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                any(Pageable.class), anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(new PageImpl<>(List.of(booking4)));
+        when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+                any(Pageable.class), anyLong(), anyString()))
+                .thenReturn(new PageImpl<>(List.of(booking5)));
 
         List<BookingDto> bookingDtos = bookingService.getOwnersBookings(1, "ALL", 0, 10);
-
         assertEquals(1, bookingDtos.size());
         assertEquals(1, bookingDtos.get(0).getId());
         assertEquals(1, bookingDtos.get(0).getItem().getId());
-        assertEquals(BookingStatus.WAITING, bookingDtos.get(0).getStatus());
-        assertEquals(1, bookingDtos.get(0).getBooker().getId());
+
+        bookingDtos = bookingService.getOwnersBookings(1, "PAST", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(2, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getOwnersBookings(1, "FUTURE", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(3, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getOwnersBookings(1, "CURRENT", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(4, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getOwnersBookings(1, "WAITING", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(5, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getOwnersBookings(1, "REJECTED", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(5, bookingDtos.get(0).getId());
     }
 
     @Test
     void getBookersBookings() {
+        Booking booking1 = createBooking();
+        Booking booking2 = createBooking();
+        Booking booking3 = createBooking();
+        Booking booking4 = createBooking();
+        Booking booking5 = createBooking();
+        booking1.setId(1);
+        booking2.setId(2);
+        booking3.setId(3);
+        booking4.setId(4);
+        booking5.setId(5);
+
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
-        when(bookingRepository.findByBookerIdOrderByStartDesc(any(Pageable.class), anyLong()))
-                .thenReturn(new PageImpl<>(List.of(createBooking())));
+        when(bookingRepository.findByBookerIdOrderByStartDesc(
+                any(Pageable.class), anyLong()))
+                .thenReturn(new PageImpl<>(List.of(booking1)));
+        when(bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
+                any(Pageable.class), anyLong(), any(LocalDateTime.class)))
+                .thenReturn(new PageImpl<>(List.of(booking2)));
+        when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
+                any(Pageable.class), anyLong(), any(LocalDateTime.class)))
+                .thenReturn(new PageImpl<>(List.of(booking3)));
+        when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                any(Pageable.class), anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
+                .thenReturn(new PageImpl<>(List.of(booking4)));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
+                any(Pageable.class), anyLong(), anyString()))
+                .thenReturn(new PageImpl<>(List.of(booking5)));
 
         List<BookingDto> bookingDtos = bookingService.getBookersBookings(1, "ALL", 0, 10);
 
         assertEquals(1, bookingDtos.size());
         assertEquals(1, bookingDtos.get(0).getId());
         assertEquals(1, bookingDtos.get(0).getItem().getId());
-        assertEquals(BookingStatus.WAITING, bookingDtos.get(0).getStatus());
-        assertEquals(1, bookingDtos.get(0).getBooker().getId());
 
+        bookingDtos = bookingService.getBookersBookings(1, "PAST", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(2, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getBookersBookings(1, "FUTURE", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(3, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getBookersBookings(1, "CURRENT", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(4, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getBookersBookings(1, "WAITING", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(5, bookingDtos.get(0).getId());
+
+        bookingDtos = bookingService.getBookersBookings(1, "REJECTED", 0, 10);
+        assertEquals(1, bookingDtos.size());
+        assertEquals(5, bookingDtos.get(0).getId());
     }
 
     private Item createItem() {
