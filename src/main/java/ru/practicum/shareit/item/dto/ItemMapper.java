@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.dto;
 
-import org.springframework.data.domain.Page;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -44,12 +43,6 @@ public class ItemMapper {
     }
 
     public static List<ItemDto> toItemDtoList(List<Item> items) {
-        return items.stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
-    }
-
-    public static List<ItemDto> toItemDtoList(Page<Item> items) {
         return items.stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
