@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.model.ItemRequest;
@@ -19,23 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 class ItemRepositoryTest {
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ItemRequestRepository itemRequestRepository;
-
     private final User user1 = User.builder()
             .name("User1")
             .email("Email1@email.com")
             .build();
-
     private final User user2 = User.builder()
             .name("User2")
             .email("Email2@email.com")
             .build();
-
     private final ItemRequest itemRequest = ItemRequest.builder()
             .requestor(user2)
             .description("request")
@@ -60,7 +50,12 @@ class ItemRepositoryTest {
             .available(Boolean.TRUE)
             .owner(user2)
             .build();
-
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ItemRequestRepository itemRequestRepository;
 
     @BeforeEach
     void beforeEach() {
@@ -74,32 +69,32 @@ class ItemRepositoryTest {
 
     @Test
     void findByOwnerId() {
-        Page<Item> items = itemRepository.findByOwnerId(Pageable.unpaged(), user1.getId());
+        List<Item> items = itemRepository.findByOwnerId(Pageable.unpaged(), user1.getId());
 
-        assertEquals(2, items.getContent().size());
+        assertEquals(2, items.size());
 
-        assertEquals(user1, items.getContent().get(0).getOwner());
-        assertEquals("Name1", items.getContent().get(0).getName());
+        assertEquals(user1, items.get(0).getOwner());
+        assertEquals("Name1", items.get(0).getName());
 
-        assertEquals(user1, items.getContent().get(1).getOwner());
-        assertEquals("Name2", items.getContent().get(1).getName());
+        assertEquals(user1, items.get(1).getOwner());
+        assertEquals("Name2", items.get(1).getName());
     }
 
     @Test
     void findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue() {
-        Page<Item> items = itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+        List<Item> items = itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
                 Pageable.unpaged(), "car", "car");
 
-        assertEquals(2, items.getContent().size());
+        assertEquals(2, items.size());
 
-        assertEquals(user1, items.getContent().get(0).getOwner());
-        assertEquals("Name1", items.getContent().get(0).getName());
-        assertEquals("Car", items.getContent().get(0).getDescription());
+        assertEquals(user1, items.get(0).getOwner());
+        assertEquals("Name1", items.get(0).getName());
+        assertEquals("Car", items.get(0).getDescription());
 
 
-        assertEquals(user2, items.getContent().get(1).getOwner());
-        assertEquals("car", items.getContent().get(1).getName());
-        assertEquals("Lamborghini", items.getContent().get(1).getDescription());
+        assertEquals(user2, items.get(1).getOwner());
+        assertEquals("car", items.get(1).getName());
+        assertEquals("Lamborghini", items.get(1).getDescription());
     }
 
     @Test

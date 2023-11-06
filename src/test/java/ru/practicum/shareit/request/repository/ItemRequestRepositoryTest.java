@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
@@ -17,11 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 class ItemRequestRepositoryTest {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ItemRequestRepository itemRequestRepository;
-
     private final User user1 = User.builder()
             .name("User1")
             .email("Email1@email.com")
@@ -45,6 +39,10 @@ class ItemRequestRepositoryTest {
             .description("request3")
             .created(LocalDateTime.now().plusDays(3))
             .build();
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ItemRequestRepository itemRequestRepository;
 
     @BeforeEach
     void beforeEach() {
@@ -71,14 +69,14 @@ class ItemRequestRepositoryTest {
 
     @Test
     void findByRequestorIdNot() {
-        Page<ItemRequest> itemRequests = itemRequestRepository.findByRequestorIdNot(Pageable.unpaged(), user2.getId());
+        List<ItemRequest> itemRequests = itemRequestRepository.findByRequestorIdNot(Pageable.unpaged(), user2.getId());
 
-        assertEquals(2, itemRequests.getContent().size());
+        assertEquals(2, itemRequests.size());
 
-        assertEquals("request1", itemRequests.getContent().get(0).getDescription());
-        assertEquals(user1, itemRequests.getContent().get(0).getRequestor());
+        assertEquals("request1", itemRequests.get(0).getDescription());
+        assertEquals(user1, itemRequests.get(0).getRequestor());
 
-        assertEquals("request2", itemRequests.getContent().get(1).getDescription());
-        assertEquals(user1, itemRequests.getContent().get(1).getRequestor());
+        assertEquals("request2", itemRequests.get(1).getDescription());
+        assertEquals(user1, itemRequests.get(1).getRequestor());
     }
 }

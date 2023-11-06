@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
@@ -20,30 +19,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 class BookingRepositoryTest {
-    @Autowired
-    private BookingRepository bookingRepository;
-    @Autowired
-    private ItemRepository itemRepository;
-    @Autowired
-    private UserRepository userRepository;
-
     private final User owner = User.builder()
             .name("Owner")
             .email("Email1@email.com")
             .build();
-
     private final User booker = User.builder()
             .name("Booker")
             .email("Email2@email.com")
             .build();
-
     private final Item item = Item.builder()
             .name("Name")
             .description("Description")
             .available(Boolean.TRUE)
             .owner(owner)
             .build();
-
     private final Booking booking = Booking.builder()
             .start(LocalDateTime.now().plusDays(1))
             .end(LocalDateTime.now().plusDays(3))
@@ -51,6 +40,12 @@ class BookingRepositoryTest {
             .booker(booker)
             .status(BookingStatus.APPROVED.name())
             .build();
+    @Autowired
+    private BookingRepository bookingRepository;
+    @Autowired
+    private ItemRepository itemRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @BeforeEach
     void beforeEach() {
@@ -62,140 +57,140 @@ class BookingRepositoryTest {
 
     @Test
     void findByBookerIdOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(Pageable.unpaged(), booker.getId());
+        List<Booking> bookings = bookingRepository.findByBookerIdOrderByStartDesc(Pageable.unpaged(), booker.getId());
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByBookerIdAndEndBeforeOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), LocalDateTime.now());
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), LocalDateTime.now().plusDays(4));
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByBookerIdAndStartAfterOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), LocalDateTime.now().plusDays(4));
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), LocalDateTime.now());
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), LocalDateTime.now(), LocalDateTime.now());
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(2));
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByBookerIdAndStatusOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), BookingStatus.REJECTED.name());
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 Pageable.unpaged(), booker.getId(), BookingStatus.APPROVED.name());
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByItemOwnerIdOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(Pageable.unpaged(), owner.getId());
+        List<Booking> bookings = bookingRepository.findByItemOwnerIdOrderByStartDesc(Pageable.unpaged(), owner.getId());
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByItemOwnerIdAndEndBeforeOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), LocalDateTime.now());
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), LocalDateTime.now().plusDays(4));
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByItemOwnerIdAndStartAfterOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), LocalDateTime.now().plusDays(4));
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), LocalDateTime.now());
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), LocalDateTime.now(), LocalDateTime.now());
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(2));
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test
     void findByItemOwnerIdAndStatusOrderByStartDesc() {
-        Page<Booking> bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+        List<Booking> bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), BookingStatus.REJECTED.name());
 
-        assertEquals(0, bookings.getContent().size());
+        assertEquals(0, bookings.size());
 
         bookings = bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 Pageable.unpaged(), owner.getId(), BookingStatus.APPROVED.name());
 
-        assertEquals(1, bookings.getContent().size());
-        assertEquals(booker, bookings.getContent().get(0).getBooker());
-        assertEquals(item, bookings.getContent().get(0).getItem());
+        assertEquals(1, bookings.size());
+        assertEquals(booker, bookings.get(0).getBooker());
+        assertEquals(item, bookings.get(0).getItem());
     }
 
     @Test

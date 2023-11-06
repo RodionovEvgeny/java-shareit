@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingStatus;
@@ -155,19 +154,19 @@ class BookingServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
         when(bookingRepository.findByItemOwnerIdOrderByStartDesc(
                 any(Pageable.class), anyLong()))
-                .thenReturn(new PageImpl<>(List.of(booking1)));
+                .thenReturn(List.of(booking1));
         when(bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
                 any(Pageable.class), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(new PageImpl<>(List.of(booking2)));
+                .thenReturn(List.of(booking2));
         when(bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
                 any(Pageable.class), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(new PageImpl<>(List.of(booking3)));
+                .thenReturn(List.of(booking3));
         when(bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 any(Pageable.class), anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
-                .thenReturn(new PageImpl<>(List.of(booking4)));
+                .thenReturn(List.of(booking4));
         when(bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                 any(Pageable.class), anyLong(), anyString()))
-                .thenReturn(new PageImpl<>(List.of(booking5)));
+                .thenReturn(List.of(booking5));
 
         List<BookingDto> bookingDtos = bookingService.getOwnersBookings(1, "ALL", 0, 10);
         assertEquals(1, bookingDtos.size());
@@ -219,19 +218,19 @@ class BookingServiceImplTest {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
         when(bookingRepository.findByBookerIdOrderByStartDesc(
                 any(Pageable.class), anyLong()))
-                .thenReturn(new PageImpl<>(List.of(booking1)));
+                .thenReturn(List.of(booking1));
         when(bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
                 any(Pageable.class), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(new PageImpl<>(List.of(booking2)));
+                .thenReturn(List.of(booking2));
         when(bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
                 any(Pageable.class), anyLong(), any(LocalDateTime.class)))
-                .thenReturn(new PageImpl<>(List.of(booking3)));
+                .thenReturn(List.of(booking3));
         when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                 any(Pageable.class), anyLong(), any(LocalDateTime.class), any(LocalDateTime.class)))
-                .thenReturn(new PageImpl<>(List.of(booking4)));
+                .thenReturn(List.of(booking4));
         when(bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                 any(Pageable.class), anyLong(), anyString()))
-                .thenReturn(new PageImpl<>(List.of(booking5)));
+                .thenReturn(List.of(booking5));
 
         List<BookingDto> bookingDtos = bookingService.getBookersBookings(1, "ALL", 0, 10);
 

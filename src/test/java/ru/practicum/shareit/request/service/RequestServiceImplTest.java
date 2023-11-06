@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -71,7 +70,7 @@ class RequestServiceImplTest {
     void getAllItemRequests() {
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(createUser()));
         when(itemRequestRepository.findByRequestorIdNot(any(Pageable.class), anyLong()))
-                .thenReturn(new PageImpl<>(List.of(createItemRequest())));
+                .thenReturn(List.of(createItemRequest()));
         when(itemRepository.findByRequestId(anyLong())).thenReturn(List.of(new Item()));
 
 

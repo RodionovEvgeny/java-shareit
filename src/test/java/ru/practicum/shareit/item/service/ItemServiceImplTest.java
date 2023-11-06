@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.dto.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
@@ -105,7 +104,7 @@ class ItemServiceImplTest {
         when(commentRepository.findByItemId(anyLong())).thenReturn(List.of(createComment()));
         when(bookingRepository.getFutureBookings(any(LocalDateTime.class), anyLong())).thenReturn(List.of(createBooking()));
         when(bookingRepository.getPastBookings(any(LocalDateTime.class), anyLong())).thenReturn(List.of(createBooking()));
-        when(itemRepository.findByOwnerId(any(Pageable.class), anyLong())).thenReturn(new PageImpl<>(List.of(createItem())));
+        when(itemRepository.findByOwnerId(any(Pageable.class), anyLong())).thenReturn(List.of(createItem()));
 
         List<ItemDto> itemDtos = itemService.getOwnersItems(anyLong(), 0, 10);
 
@@ -126,7 +125,7 @@ class ItemServiceImplTest {
                 any(Pageable.class),
                 anyString(),
                 anyString()))
-                .thenReturn(new PageImpl<>(List.of(createItem())));
+                .thenReturn(List.of(createItem()));
 
         List<ItemDto> itemDtos = itemService.findItems("name", 0, 10);
 

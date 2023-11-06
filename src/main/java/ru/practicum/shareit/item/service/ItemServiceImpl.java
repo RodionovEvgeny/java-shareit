@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -80,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getOwnersItems(long userId, int from, int size) {
         validateUserById(userId);
         Pageable pageable = PageRequest.of(from / size, size);
-        Page<Item> items = itemRepository.findByOwnerId(pageable, userId);
+        List<Item> items = itemRepository.findByOwnerId(pageable, userId);
         return items.stream()
                 .map(this::addBookingToItem)
                 .map(this::addCommentsToItemDto)
