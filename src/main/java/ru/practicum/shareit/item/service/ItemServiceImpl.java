@@ -1,24 +1,28 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exceptions.EntityNotFoundException;
 import ru.practicum.shareit.exceptions.InappropriateCommentException;
 import ru.practicum.shareit.exceptions.NoAccessException;
-import ru.practicum.shareit.item.Comment;
-import ru.practicum.shareit.item.Item;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -33,12 +37,18 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Transactional
     @Override
     public ItemDto addItem(long userId, ItemDto itemDto) {
         User user = validateUserById(userId);
-        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user));
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId()).orElse(null);
+        }
+
+        Item item = itemRepository.save(ItemMapper.toItem(itemDto, user, itemRequest));
         return ItemMapper.toItemDto(item);
     }
 
@@ -66,9 +76,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> getOwnersItems(long userId) {
+    public List<ItemDto> getOwnersItems(long userId, int from, int size) {
         validateUserById(userId);
-        List<Item> items = itemRepository.findByOwnerId(userId);
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findByOwnerId(pageable, userId);
         return items.stream()
                 .map(this::addBookingToItem)
                 .map(this::addCommentsToItemDto)
@@ -77,10 +88,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<ItemDto> findItems(String text) {
+    public List<ItemDto> findItems(String text, int from, int size) {
         if (text == null || text.isBlank()) return new ArrayList<>();
+        Pageable pageable = PageRequest.of(from / size, size);
         return ItemMapper.toItemDtoList(itemRepository
-                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(text, text));
+                .findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(pageable, text, text));
     }
 
     @Transactional
