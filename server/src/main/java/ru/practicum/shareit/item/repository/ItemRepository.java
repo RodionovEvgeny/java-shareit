@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    List<Item> findByOwnerId(Pageable pageable, long ownerId);
+    List<Item> findByOwnerIdOrderById(Pageable pageable, long ownerId);
 
     List<Item> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(Pageable pageable,
                                                                                                  String text,

@@ -79,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> getOwnersItems(long userId, int from, int size) {
         validateUserById(userId);
         Pageable pageable = PageRequest.of(from / size, size);
-        List<Item> items = itemRepository.findByOwnerId(pageable, userId);
+        List<Item> items = itemRepository.findByOwnerIdOrderById(pageable, userId);
         return items.stream()
                 .map(this::addBookingToItem)
                 .map(this::addCommentsToItemDto)
