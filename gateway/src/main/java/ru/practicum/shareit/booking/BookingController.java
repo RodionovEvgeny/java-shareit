@@ -12,9 +12,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.practicum.shareit.exceptions.InappropriateTimeException;
+import ru.practicum.shareit.exceptions.UnsupportedStatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.sql.Timestamp;
+import java.time.Instant;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -26,6 +30,16 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<Object> addBooking(@RequestHeader("X-Sharer-User-Id") long userId,
                                              @Valid @RequestBody BookItemRequestDto bookingDto) {
+        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
+            throw new InappropriateTimeException("Необходимо указать время начала и окончания бронирования!");
+        } else if (bookingDto.getStart().equals(bookingDto.getEnd())) {
+            throw new InappropriateTimeException("Время начала и окончания бронирования должно отличаться!");
+        } else if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
+            throw new InappropriateTimeException("Время начала бронирования не может быть после окончания бронирования!");
+        } else if (bookingDto.getStart().isBefore(Timestamp.from(Instant.now()).toLocalDateTime()) ||
+                bookingDto.getEnd().isBefore(Timestamp.from(Instant.now()).toLocalDateTime())) {
+            throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
+        }
         return bookingClient.addBooking(userId, bookingDto);
     }
 
@@ -51,7 +65,7 @@ public class BookingController {
             @RequestParam(value = "size", defaultValue = "10")
             @Min(value = 1, message = "Размер страницы должен быть больше 0") int size) {
         BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+                .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + stateParam));
         return bookingClient.getBookersBookings(userId, state, from, size);
     }
 
@@ -64,7 +78,7 @@ public class BookingController {
             @RequestParam(value = "size", defaultValue = "10")
             @Min(value = 1, message = "Размер страницы должен быть больше 0") int size) {
         BookingState state = BookingState.from(stateParam)
-                .orElseThrow(() -> new IllegalArgumentException("Unknown state: " + stateParam));
+                .orElseThrow(() -> new UnsupportedStatusException("Unknown state: " + stateParam));
         return bookingClient.getOwnersBookings(userId, state, from, size);
     }
 }

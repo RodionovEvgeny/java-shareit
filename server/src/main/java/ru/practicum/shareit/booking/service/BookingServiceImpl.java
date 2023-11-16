@@ -24,8 +24,6 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -164,16 +162,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private void validateBookingsDates(BookingDto bookingDto) {
-        if (bookingDto.getStart() == null || bookingDto.getEnd() == null) {
-            throw new InappropriateTimeException("Необходимо указать время начала и окончания бронирования!");
-        } else if (bookingDto.getStart().equals(bookingDto.getEnd())) {
-            throw new InappropriateTimeException("Время начала и окончания бронирования должно отличаться!");
-        } else if (bookingDto.getStart().isAfter(bookingDto.getEnd())) {
-            throw new InappropriateTimeException("Время начала бронирования не может быть после окончания бронирования!");
-        } else if (bookingDto.getStart().isBefore(Timestamp.from(Instant.now()).toLocalDateTime()) ||
-                bookingDto.getEnd().isBefore(Timestamp.from(Instant.now()).toLocalDateTime())) {
-            throw new InappropriateTimeException("Время начала и окончания бронирования не могут быть в прошлом!");
-        }
         List<Booking> bookings = bookingRepository.findByItemIdOrderByStartDesc(bookingDto.getItemId()
         );
         for (Booking booking : bookings) {
