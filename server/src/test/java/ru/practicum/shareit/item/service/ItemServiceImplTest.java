@@ -104,7 +104,7 @@ class ItemServiceImplTest {
         when(commentRepository.findByItemId(anyLong())).thenReturn(List.of(createComment()));
         when(bookingRepository.getFutureBookings(any(LocalDateTime.class), anyLong())).thenReturn(List.of(createBooking()));
         when(bookingRepository.getPastBookings(any(LocalDateTime.class), anyLong())).thenReturn(List.of(createBooking()));
-        when(itemRepository.findByOwnerId(any(Pageable.class), anyLong())).thenReturn(List.of(createItem()));
+        when(itemRepository.findByOwnerIdOrderById(any(Pageable.class), anyLong())).thenReturn(List.of(createItem()));
 
         List<ItemDto> itemDtos = itemService.getOwnersItems(anyLong(), 0, 10);
 
